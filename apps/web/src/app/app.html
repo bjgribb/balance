@@ -1,15 +1,8 @@
-<mat-toolbar class="topbar">
+<mat-toolbar #topbar class="topbar">
   <span class="brand">{{ title() }}</span>
-  <span class="spacer"></span>
-  <mat-button-toggle-group
-    [value]="themeMode()"
-    (change)="onThemeChange($event)"
-    aria-label="Theme mode"
-  >
-    <mat-button-toggle value="system">System</mat-button-toggle>
-    <mat-button-toggle value="light">Light</mat-button-toggle>
-    <mat-button-toggle value="dark">Dark</mat-button-toggle>
-  </mat-button-toggle-group>
+  <div class="auth-actions">
+    <button mat-button type="button" (click)="logout()">Logout</button>
+  </div>
 </mat-toolbar>
 
 <main class="shell">

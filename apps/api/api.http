@@ -1,6 +1,38 @@
 @api_HostAddress = http://localhost:5245
+@userEmail = testuser@example.com
+@userPassword = Password123!
+@accessToken = paste_access_token_here
+@refreshToken = paste_refresh_token_here
 
-GET {{api_HostAddress}}/weatherforecast/
+### Register
+POST {{api_HostAddress}}/api/auth/register
+Content-Type: application/json
+
+{
+	"email": "{{userEmail}}",
+	"password": "{{userPassword}}"
+}
+
+### Login
+POST {{api_HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+	"email": "{{userEmail}}",
+	"password": "{{userPassword}}"
+}
+
+### Refresh
+POST {{api_HostAddress}}/api/auth/refresh
+Content-Type: application/json
+
+{
+	"refreshToken": "{{refreshToken}}"
+}
+
+### Get Todos (Authorized)
+GET {{api_HostAddress}}/api/todos
 Accept: application/json
+Authorization: Bearer {{accessToken}}
 
 ###

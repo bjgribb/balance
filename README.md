@@ -41,6 +41,14 @@ dotnet user-secrets set "ConnectionStrings:DefaultConnection" \
 
 Replace `<user>` and `<password>` with the values from your `.env` file at `apps/infrastructure/docker/.env`.
 
+Set a JWT signing key for local development:
+
+```sh
+dotnet user-secrets set "Jwt:SecretKey" "<very-long-random-string>"
+```
+
+Use a long random value (at least 32 characters).
+
 ---
 
 ## Running the Project
@@ -79,6 +87,36 @@ npm start
 ```
 
 App available at http://localhost:4200.
+
+Auth pages are available at:
+
+- http://localhost:4200/register
+- http://localhost:4200/login
+
+After sign-in, the app redirects to `/dashboard`.
+
+---
+
+## Authentication Notes
+
+- API auth endpoints:
+  - `POST /api/auth/register`
+  - `POST /api/auth/login`
+  - `POST /api/auth/refresh`
+- `GET /api/todos` is protected and requires `Authorization: Bearer <accessToken>`.
+- Frontend auth state uses `sessionStorage` for access token, refresh token, and access-token expiration.
+- The frontend automatically attempts a single token refresh on `401` responses, then retries the request.
+
+### Quick API Auth Test
+
+Use the HTTP request file at `apps/api/api.http` to manually test:
+
+1. Register
+2. Login
+3. Refresh token
+4. Authorized todos request
+
+Run the API first (`dotnet run` in `apps/api`), then execute the requests in order.
 
 ---
 

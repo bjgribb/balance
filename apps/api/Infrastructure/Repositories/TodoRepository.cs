@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace api.Infrastructure.Repositories;
 
-public class TodoRepository(AppDbContext dbContext) : ITodoRepository
+public class TodoRepository(ApplicationDbContext dbContext) : ITodoRepository
 {
     public async Task<List<TodoItem>> GetAllAsync(CancellationToken cancellationToken = default)
     {

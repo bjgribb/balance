@@ -1,0 +1,43 @@
+<section class="auth-layout">
+  <mat-card class="auth-card" appearance="outlined">
+    <h1>Create your account</h1>
+    <p>Sign up to begin tracking your finances.</p>
+
+    <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+      <mat-form-field appearance="outline">
+        <mat-label>Email</mat-label>
+        <input matInput type="email" autocomplete="email" formControlName="email" />
+        @if (form.controls.email.touched && form.controls.email.hasError('required')) {
+          <mat-error>Email is required.</mat-error>
+        }
+        @if (form.controls.email.touched && form.controls.email.hasError('email')) {
+          <mat-error>Enter a valid email address.</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Password</mat-label>
+        <input matInput type="password" autocomplete="new-password" formControlName="password" />
+        @if (form.controls.password.touched && form.controls.password.hasError('required')) {
+          <mat-error>Password is required.</mat-error>
+        }
+        @if (form.controls.password.touched && form.controls.password.hasError('minlength')) {
+          <mat-error>Password must be at least 8 characters.</mat-error>
+        }
+      </mat-form-field>
+
+      @if (errorMessage()) {
+        <p class="error">{{ errorMessage() }}</p>
+      }
+
+      <button mat-flat-button type="submit" [disabled]="loading()">
+        {{ loading() ? 'Creating account...' : 'Create account' }}
+      </button>
+    </form>
+
+    <p class="alt-link">
+      Already have an account?
+      <a routerLink="/login">Sign in</a>
+    </p>
+  </mat-card>
+</section>

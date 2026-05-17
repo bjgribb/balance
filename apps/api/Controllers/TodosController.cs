@@ -1,11 +1,13 @@
 using api.Application.Todos;
 using api.Application.Todos.Contracts;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class TodosController(ITodoService todoService) : ControllerBase
 {
     [HttpGet]
