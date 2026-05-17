@@ -1,0 +1,17 @@
+<mat-toolbar class="topbar">
+  <span class="brand">{{ title() }}</span>
+  <span class="spacer"></span>
+  <mat-button-toggle-group
+    [value]="themeMode()"
+    (change)="onThemeChange($event)"
+    aria-label="Theme mode"
+  >
+    <mat-button-toggle value="system">System</mat-button-toggle>
+    <mat-button-toggle value="light">Light</mat-button-toggle>
+    <mat-button-toggle value="dark">Dark</mat-button-toggle>
+  </mat-button-toggle-group>
+</mat-toolbar>
+
+<main class="shell">
+  <router-outlet />
+</main>

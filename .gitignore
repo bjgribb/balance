@@ -1,0 +1,76 @@
+# ─── Operating System ────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ─── IDEs & Editors ──────────────────────────────────────────────────────────
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+!.vscode/mcp.json
+.history/
+*.sublime-workspace
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+
+# ─── Angular (apps/web) ──────────────────────────────────────────────────────
+apps/web/dist/
+apps/web/tmp/
+apps/web/out-tsc/
+apps/web/node_modules/
+apps/web/.angular/cache/
+apps/web/coverage/
+apps/web/.sass-cache/
+apps/web/connect.lock
+apps/web/libpeerconnection.log
+apps/web/testem.log
+apps/web/typings/
+apps/web/__screenshots__/
+npm-debug.log
+yarn-error.log
+
+# ─── .NET / ASP.NET Core (apps/api) ──────────────────────────────────────────
+apps/api/bin/
+apps/api/obj/
+apps/api/*.user
+apps/api/*.suo
+
+# NuGet
+*.nupkg
+*.snupkg
+.nuget/
+packages/
+
+# Publish output
+apps/api/publish/
+apps/api/out/
+
+# Secret / environment overrides (keep appsettings.json, ignore local secrets)
+apps/api/appsettings.Local.json
+apps/api/appsettings.*.Local.json
+**/secrets.json
+
+# ─── Docker / Infrastructure ─────────────────────────────────────────────────
+# Ignore local env overrides but keep the base compose file
+apps/infrastructure/docker/.env
+apps/infrastructure/docker/.env.*
+apps/infrastructure/docker/docker-compose.override.yml
+
+# ─── Secrets & Credentials ───────────────────────────────────────────────────
+.env
+.env.*
+!.env.example
+*.pfx
+*.p12
+*.key
+*.pem
