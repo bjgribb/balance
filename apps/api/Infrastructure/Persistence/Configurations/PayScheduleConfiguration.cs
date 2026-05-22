@@ -8,6 +8,11 @@ public class PayScheduleConfiguration : IEntityTypeConfiguration<PaySchedule>
 {
     public void Configure(EntityTypeBuilder<PaySchedule> builder)
     {
+        builder.ToTable("pay_schedules", t =>
+        {
+            t.HasCheckConstraint("ck_pay_schedules_estimated_pay_amount_positive", "estimated_pay_amount > 0");
+        });
+
         builder.HasKey(x => x.Id);
 
         builder.Property(x => x.Frequency)

@@ -30,10 +30,15 @@ public static class DependencyInjection
             .AddRoles<IdentityRole<Guid>>()
             .AddEntityFrameworkStores<ApplicationDbContext>();
 
+        services.AddHttpContextAccessor();
+
         services.AddScoped<ITokenService, TokenService>();
+        services.AddScoped<ICurrentUserAccessor, CurrentUserAccessor>();
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<ITodoRepository, TodoRepository>();
+        services.AddScoped<IPayScheduleRepository, PayScheduleRepository>();
 
         return services;
     }
 }
+
