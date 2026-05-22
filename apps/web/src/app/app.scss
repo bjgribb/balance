@@ -1,14 +1,14 @@
 :host {
-  display: block;
   min-height: 100%;
-  --topbar-height: 64px;
+  display: flex;
+  flex-direction: column;
 }
 
 .topbar {
   position: sticky;
   top: 0;
   z-index: 10;
-  min-height: var(--topbar-height);
+  flex: 0 0 auto;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -20,6 +20,8 @@
 }
 
 .brand {
+  color: inherit;
+  text-decoration: none;
   font-size: 1.1rem;
   font-weight: 700;
   letter-spacing: 0.04em;
@@ -37,22 +39,38 @@
   min-width: max-content;
 }
 
+.account-trigger {
+  color: var(--mat-sys-primary);
+}
+
+.account-trigger mat-icon {
+  font-size: 1.35rem;
+  width: 1.35rem;
+  height: 1.35rem;
+  line-height: 1;
+}
+
 .shell {
-  min-height: calc(100dvh - var(--topbar-height, 64px));
-  display: grid;
-  place-items: center;
-  padding: 1.5rem 1rem;
+  box-sizing: border-box;
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 1rem;
   background:
-    radial-gradient(
-      circle at 10% 15%,
+    radial-gradient(circle at 10% 15%,
       color-mix(in srgb, var(--mat-sys-primary) 18%, transparent),
-      transparent 45%
-    ),
-    radial-gradient(
-      circle at 90% 85%,
+      transparent 45%),
+    radial-gradient(circle at 90% 85%,
       color-mix(in srgb, var(--mat-sys-tertiary) 16%, transparent),
-      transparent 50%
-    );
+      transparent 50%);
+}
+
+@media (min-width: 640px) {
+  .shell {
+    padding: 1.5rem 1rem;
+  }
 }
 
 .hero {

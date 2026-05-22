@@ -1,8 +1,24 @@
 <mat-toolbar #topbar class="topbar">
-  <span class="brand">{{ title() }}</span>
+  <a class="brand" routerLink="/dashboard">{{ title() }}</a>
+  @if (isAuthenticated()) {
   <div class="auth-actions">
-    <button mat-button type="button" (click)="logout()">Logout</button>
+    <button mat-icon-button type="button" class="account-trigger" [matMenuTriggerFor]="accountMenu" matTooltip="Account"
+      aria-label="Open account menu">
+      <mat-icon>person</mat-icon>
+    </button>
+
+    <mat-menu #accountMenu="matMenu" xPosition="before">
+      <button mat-menu-item type="button" routerLink="/pay-schedule">
+        <mat-icon>settings</mat-icon>
+        <span>Pay schedule settings</span>
+      </button>
+      <button mat-menu-item type="button" (click)="logout()">
+        <mat-icon>logout</mat-icon>
+        <span>Logout</span>
+      </button>
+    </mat-menu>
   </div>
+  }
 </mat-toolbar>
 
 <main class="shell">

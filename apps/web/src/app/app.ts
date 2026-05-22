@@ -1,37 +1,39 @@
 import {
-  AfterViewInit,
   Component,
-  DestroyRef,
-  ElementRef,
-  ViewChild,
   inject,
   signal,
 } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatMenuModule } from '@angular/material/menu';
 import { MatToolbarModule } from '@angular/material/toolbar';
-import { Router, RouterOutlet } from '@angular/router';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { Router, RouterLink, RouterOutlet } from '@angular/router';
 import { AuthSessionService } from './auth/services/auth-session.service';
 
 type ThemeMode = 'light' | 'dark';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, MatToolbarModule, MatButtonModule],
+  imports: [
+    RouterOutlet,
+    RouterLink,
+    MatToolbarModule,
+    MatButtonModule,
+    MatIconModule,
+    MatMenuModule,
+    MatTooltipModule,
+  ],
   templateUrl: './app.html',
   styleUrl: './app.scss',
 })
-export class App implements AfterViewInit {
+export class App {
   private readonly authSession = inject(AuthSessionService);
   private readonly router = inject(Router);
-  private readonly destroyRef = inject(DestroyRef);
-  private readonly hostElement = inject(ElementRef<HTMLElement>);
   private readonly prefersDarkQuery = this.createThemeQuery();
-  private topbarResizeObserver?: ResizeObserver;
-
-  @ViewChild('topbar', { read: ElementRef })
-  private topbarRef?: ElementRef<HTMLElement>;
 
   protected readonly title = signal('Balance');
+  protected readonly isAuthenticated = this.authSession.isAuthenticated;
 
   constructor() {
     this.syncToSystemTheme();
@@ -42,34 +44,6 @@ export class App implements AfterViewInit {
     };
 
     this.prefersDarkQuery.addEventListener('change', onSystemThemeChange);
-    this.destroyRef.onDestroy(() => {
-      this.prefersDarkQuery.removeEventListener('change', onSystemThemeChange);
-    });
-  }
-
-  ngAfterViewInit(): void {
-    this.syncTopbarHeight();
-
-    const topbar = this.topbarRef?.nativeElement;
-    if (topbar && 'ResizeObserver' in window) {
-      this.topbarResizeObserver = new ResizeObserver(() => {
-        this.syncTopbarHeight();
-      });
-
-      this.topbarResizeObserver.observe(topbar);
-      this.destroyRef.onDestroy(() => {
-        this.topbarResizeObserver?.disconnect();
-      });
-    }
-
-    const onWindowResize = (): void => {
-      this.syncTopbarHeight();
-    };
-
-    window.addEventListener('resize', onWindowResize, { passive: true });
-    this.destroyRef.onDestroy(() => {
-      window.removeEventListener('resize', onWindowResize);
-    });
   }
 
   protected logout(): void {
@@ -120,15 +94,5 @@ export class App implements AfterViewInit {
     if (mode === 'dark') {
       root.classList.add('dark-theme');
     }
-  }
-
-  private syncTopbarHeight(): void {
-    const topbarHeight = this.topbarRef?.nativeElement.getBoundingClientRect().height;
-    if (!topbarHeight || topbarHeight <= 0) {
-      return;
-    }
-
-    const roundedHeight = Math.ceil(topbarHeight);
-    this.hostElement.nativeElement.style.setProperty('--topbar-height', `${roundedHeight}px`);
   }
 }

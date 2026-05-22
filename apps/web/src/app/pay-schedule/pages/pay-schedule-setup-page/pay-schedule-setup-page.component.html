@@ -1,0 +1,74 @@
+<section class="setup-layout">
+    <mat-card class="setup-card" appearance="outlined">
+        <mat-card-header class="setup-card__header">
+            <mat-card-title class="setup-card__title">Pay Schedule</mat-card-title>
+        </mat-card-header>
+
+        <mat-card-content class="setup-card__content">
+            @if (loading()) {
+            <div class="setup-card__loading" aria-live="polite">
+                <mat-spinner diameter="28" />
+                <p>Loading your setup...</p>
+            </div>
+            } @else {
+            <form id="pay-schedule-form" class="setup-card__form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+                <mat-form-field class="setup-card__field" appearance="outline">
+                    <mat-label>How often are you paid?</mat-label>
+                    <mat-select formControlName="frequency">
+                        @for (option of frequencyOptions; track option.value) {
+                        <mat-option [value]="option.value">{{ option.label }}</mat-option>
+                        }
+                    </mat-select>
+                    @if (form.controls.frequency.touched && form.controls.frequency.hasError('required')) {
+                    <mat-error>Please choose your pay frequency.</mat-error>
+                    }
+                </mat-form-field>
+
+                <mat-form-field class="setup-card__field" appearance="outline">
+                    <mat-label>Most recent payday</mat-label>
+                    <input matInput [matDatepicker]="picker" formControlName="anchorPayDate" />
+                    <mat-datepicker-toggle matIconSuffix [for]="picker" />
+                    <mat-datepicker #picker />
+                    @if (form.controls.anchorPayDate.touched && form.controls.anchorPayDate.hasError('required')) {
+                    <mat-error>Please pick a date.</mat-error>
+                    }
+                </mat-form-field>
+
+                <mat-form-field class="setup-card__field" appearance="outline">
+                    <mat-label>Typical paycheck amount</mat-label>
+                    <input matInput type="number" inputmode="decimal" min="0.01" step="0.01"
+                        formControlName="estimatedPayAmount" />
+                    <span matTextPrefix>$&nbsp;</span>
+                    @if (
+                    form.controls.estimatedPayAmount.touched &&
+                    form.controls.estimatedPayAmount.hasError('required')
+                    ) {
+                    <mat-error>Estimated pay amount is required.</mat-error>
+                    }
+                    @if (form.controls.estimatedPayAmount.touched && form.controls.estimatedPayAmount.hasError('min')) {
+                    <mat-error>Amount must be greater than $0.00.</mat-error>
+                    }
+                </mat-form-field>
+
+                @if (errorMessage()) {
+                <p class="setup-card__feedback setup-card__feedback--error" role="alert">{{ errorMessage() }}</p>
+                }
+
+                @if (successMessage()) {
+                <p class="setup-card__feedback setup-card__feedback--success" aria-live="polite">{{ successMessage() }}
+                </p>
+                }
+            </form>
+            }
+        </mat-card-content>
+
+        @if (!loading()) {
+        <mat-card-actions class="setup-card__actions" align="end">
+            <button mat-flat-button class="setup-card__button" type="submit" [disabled]="saving()"
+                form="pay-schedule-form">
+                {{ saving() ? 'Saving...' : hasExistingSchedule() ? 'Update pay schedule' : 'Save pay schedule' }}
+            </button>
+        </mat-card-actions>
+        }
+    </mat-card>
+</section>

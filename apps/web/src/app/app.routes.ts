@@ -25,6 +25,14 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'pay-schedule',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./pay-schedule/pages/pay-schedule-setup-page/pay-schedule-setup-page.component').then(
+        (m) => m.PayScheduleSetupPageComponent,
+      ),
+  },
+  {
     path: '',
     pathMatch: 'full',
     redirectTo: 'dashboard',
