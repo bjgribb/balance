@@ -9,13 +9,3 @@ p {
   margin: 0;
   color: var(--mat-sys-on-surface-variant);
 }
-
-@media (min-width: 640px) {
-  .dashboard-layout {
-    padding: 1rem;
-  }
-
-  .dashboard-card {
-    padding: 1.5rem;
-  }
-}
