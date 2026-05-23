@@ -1,101 +1,233 @@
 :host {
+  min-height: 100vh;
+  display: flex;
+  width: 100%;
+
+  --app-bg-spot-primary: rgb(236 98 182 / 16%);
+  --app-bg-spot-secondary: rgb(130 107 255 / 12%);
+  --app-bg-gradient: linear-gradient(152deg, #060812 0%, #0a0f22 52%, #080a17 100%);
+  --app-surface-frost: color-mix(in srgb, #0c0f22 78%, transparent);
+  --app-bottom-frost: color-mix(in srgb, #090c1b 86%, transparent);
+  --app-border-soft: rgb(255 255 255 / 10%);
+  --app-text-title: #f3f5ff;
+  --app-text-nav: rgb(241 235 255 / 82%);
+  --app-accent: #ff9beb;
+}
+
+:host-context(.light-theme) {
+  --app-bg-spot-primary: rgb(232 98 185 / 13%);
+  --app-bg-spot-secondary: rgb(120 95 230 / 10%);
+  --app-bg-gradient: linear-gradient(150deg, #f8f7ff 0%, #f3f1fb 52%, #f7f5ff 100%);
+  --app-surface-frost: color-mix(in srgb, #ffffff 84%, transparent);
+  --app-bottom-frost: color-mix(in srgb, #ffffff 90%, transparent);
+  --app-border-soft: rgb(69 44 96 / 12%);
+  --app-text-title: #221638;
+  --app-text-nav: rgb(46 31 67 / 82%);
+  --app-accent: #bf4cb0;
+}
+
+.app-shell {
+  --mat-sidenav-container-shape: 0;
+  width: 100%;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 8% 18%, var(--app-bg-spot-primary), transparent 34%),
+    radial-gradient(circle at 86% 80%, var(--app-bg-spot-secondary), transparent 40%),
+    var(--app-bg-gradient);
+}
+
+.side-nav {
+  display: none;
+}
+
+.side-nav__inner {
+  box-sizing: border-box;
   min-height: 100%;
   display: flex;
   flex-direction: column;
+  gap: 1.15rem;
+  padding: 1.5rem 1rem 1rem;
+}
+
+.content-frame {
+  box-sizing: border-box;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  overflow: auto;
 }
 
 .topbar {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  flex: 0 0 auto;
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem 1rem;
-  background: color-mix(in srgb, var(--mat-sys-surface) 88%, transparent);
+  gap: 1rem;
+  padding: 0.9rem 1rem;
+  background: var(--app-surface-frost);
   backdrop-filter: blur(10px);
-  border-bottom: 1px solid var(--mat-sys-outline-variant);
+  border-bottom: 1px solid var(--app-border-soft);
+}
+
+.topbar__brand {
+  color: var(--app-text-title);
+  text-decoration: none;
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
 }
 
 .brand {
-  color: inherit;
+  display: block;
+  color: var(--app-text-title);
   text-decoration: none;
-  font-size: 1.1rem;
+  font-size: 1.9rem;
   font-weight: 700;
-  letter-spacing: 0.04em;
+  line-height: 1.08;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  justify-self: start;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.auth-actions {
-  display: inline-flex;
-  align-items: center;
-  min-width: max-content;
-}
-
-.account-trigger {
-  color: var(--mat-sys-primary);
-}
-
-.account-trigger mat-icon {
-  font-size: 1.35rem;
-  width: 1.35rem;
-  height: 1.35rem;
-  line-height: 1;
 }
 
 .shell {
   box-sizing: border-box;
-  flex: 1 1 auto;
-  min-height: 0;
+  flex: 1 1 0;
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  padding: 1rem;
-  background:
-    radial-gradient(
-      circle at 10% 15%,
-      color-mix(in srgb, var(--mat-sys-primary) 18%, transparent),
-      transparent 45%
-    ),
-    radial-gradient(
-      circle at 90% 85%,
-      color-mix(in srgb, var(--mat-sys-tertiary) 16%, transparent),
-      transparent 50%
-    );
+  padding: 1rem 1rem 6rem;
+}
+
+.shell--auth {
+  width: 100%;
+  min-height: 100vh;
+  padding-bottom: 1rem;
+}
+
+.shell--authed {
+  width: 100%;
+}
+
+.mobile-nav {
+  position: fixed;
+  z-index: 20;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: grid;
+  grid-template-columns: repeat(var(--mobile-nav-columns, 3), minmax(0, 1fr));
+  gap: 0.35rem;
+  padding: 0.45rem 0.55rem calc(0.55rem + env(safe-area-inset-bottom));
+  background: var(--app-bottom-frost);
+  backdrop-filter: blur(12px);
+  border-top: 1px solid var(--app-border-soft);
+}
+
+.mobile-nav__item {
+  border: 0;
+  background: transparent;
+  color: var(--app-text-nav);
+  text-decoration: none;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  border-radius: 12px;
+  padding: 0.45rem 0.2rem;
+  font: inherit;
+  font-size: 0.73rem;
+}
+
+.mobile-nav__item mat-icon {
+  font-size: 1.15rem;
+  width: 1.15rem;
+  height: 1.15rem;
+}
+
+.mobile-nav__item--active {
+  color: var(--app-accent);
+  background: color-mix(in srgb, var(--app-accent) 14%, transparent);
+}
+
+.side-nav__items {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.side-nav__actions {
+  margin-top: auto;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  width: 100%;
+  box-sizing: border-box;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  padding: 0.72rem 0.72rem;
+  color: var(--app-text-nav);
+  text-decoration: none;
+}
+
+.nav-link mat-icon {
+  color: currentColor;
+  font-size: 1.1rem;
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+.nav-link--active {
+  color: var(--app-accent);
+  background: color-mix(in srgb, var(--app-accent) 12%, transparent);
+}
+
+.nav-link:hover,
+.nav-link:focus-visible {
+  color: var(--app-accent);
+  background: color-mix(in srgb, var(--app-accent) 12%, transparent);
+}
+
+.nav-link--logout {
+  display: inline-flex;
+  justify-content: flex-start;
+  font: inherit;
+  cursor: pointer;
+  margin-bottom: 1rem;
 }
 
 @media (min-width: 640px) {
-  .shell {
-    padding: 1.5rem 1rem;
+  .shell--authed {
+    padding: 1.4rem 1.25rem 1.4rem;
   }
 }
 
-.hero {
-  width: min(720px, 100%);
-  padding: 1.25rem;
-  border-radius: 24px;
-}
+@media (min-width: 960px) {
+  .side-nav {
+    display: block;
+    box-sizing: border-box;
+    border-radius: 0;
+    width: 248px;
+    height: 100vh;
+    padding: 0;
+    border-right: 1px solid var(--app-border-soft);
+    background: color-mix(in srgb, var(--mat-sys-surface) 72%, transparent);
+    backdrop-filter: blur(8px);
+  }
 
-.hero h1 {
-  margin: 0;
-  color: var(--mat-sys-on-surface);
-  font-size: clamp(1.5rem, 2.4vw, 2.2rem);
-  line-height: 1.1;
-}
+  .topbar {
+    display: none;
+  }
 
-.hero p {
-  margin: 1rem 0 0;
-  color: var(--mat-sys-on-surface-variant);
-  font-size: 1rem;
-}
+  .shell--authed {
+    padding: 1.5rem 1.25rem;
+  }
 
-.hint {
-  font-size: 0.9rem;
+  .mobile-nav {
+    display: none;
+  }
 }

@@ -13,6 +13,7 @@
   width: min(640px, 100%);
   border-radius: 20px;
   background: color-mix(in srgb, var(--mat-sys-surface) 92%, transparent);
+  padding: 1rem;
 }
 
 .setup-card__header {

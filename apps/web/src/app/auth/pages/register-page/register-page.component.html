@@ -1,6 +1,15 @@
 <section class="auth-layout">
+  <div class="auth-intro">
+    <p class="auth-brand">Balance</p>
+    <h1>Start with your paycheck, then map the rest.</h1>
+    <p class="auth-copy">
+      Create your account to set up pay schedules, track fixed expenses, and see what you can safely
+      spend.
+    </p>
+  </div>
+
   <mat-card class="auth-card" appearance="outlined">
-    <h1>Create your account</h1>
+    <h2>Create your account</h2>
     <p>Sign up to begin tracking your finances.</p>
 
     <form [formGroup]="form" (ngSubmit)="submit()" novalidate>

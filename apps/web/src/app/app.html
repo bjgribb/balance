@@ -1,32 +1,73 @@
-<mat-toolbar #topbar class="topbar">
-  <a class="brand" routerLink="/dashboard">{{ title() }}</a>
-  @if (isAuthenticated()) {
-    <div class="auth-actions">
-      <button
-        mat-icon-button
-        type="button"
-        class="account-trigger"
-        [matMenuTriggerFor]="accountMenu"
-        matTooltip="Account"
-        aria-label="Open account menu"
+@if (showAppChrome()) {
+  <mat-sidenav-container class="app-shell">
+    <mat-sidenav
+      class="side-nav"
+      mode="side"
+      [opened]="true"
+      disableClose
+      aria-label="Primary navigation"
+    >
+      <div class="side-nav__inner">
+        <a class="brand" routerLink="/dashboard">{{ title() }}</a>
+
+        <nav class="side-nav__items">
+          @for (item of desktopNavItems; track item.route) {
+            <a
+              class="nav-link"
+              [routerLink]="item.route"
+              routerLinkActive="nav-link--active"
+              [routerLinkActiveOptions]="item.activeOptions"
+            >
+              <mat-icon>{{ item.icon }}</mat-icon>
+              <span>{{ item.label }}</span>
+            </a>
+          }
+        </nav>
+
+        <div class="side-nav__actions">
+          <button type="button" class="nav-link nav-link--logout" (click)="logout()">
+            <mat-icon>logout</mat-icon>
+            <span>Sign out</span>
+          </button>
+        </div>
+      </div>
+    </mat-sidenav>
+
+    <mat-sidenav-content class="content-frame">
+      <mat-toolbar class="topbar" aria-label="Page header">
+        <a class="topbar__brand" routerLink="/dashboard">{{ title() }}</a>
+      </mat-toolbar>
+
+      <main class="shell shell--authed">
+        <router-outlet />
+      </main>
+
+      <nav
+        class="mobile-nav"
+        aria-label="Bottom navigation"
+        [style.--mobile-nav-columns]="mobileNavItems.length + 1"
       >
-        <mat-icon>person</mat-icon>
-      </button>
+        @for (item of mobileNavItems; track item.route) {
+          <a
+            class="mobile-nav__item"
+            [routerLink]="item.route"
+            routerLinkActive="mobile-nav__item--active"
+            [routerLinkActiveOptions]="item.activeOptions"
+          >
+            <mat-icon>{{ item.icon }}</mat-icon>
+            <span>{{ item.label }}</span>
+          </a>
+        }
 
-      <mat-menu #accountMenu="matMenu" xPosition="before">
-        <button mat-menu-item type="button" routerLink="/pay-schedule">
-          <mat-icon>settings</mat-icon>
-          <span>Pay schedule settings</span>
-        </button>
-        <button mat-menu-item type="button" (click)="logout()">
+        <button type="button" class="mobile-nav__item" (click)="logout()" aria-label="Sign out">
           <mat-icon>logout</mat-icon>
-          <span>Logout</span>
+          <span>Sign out</span>
         </button>
-      </mat-menu>
-    </div>
-  }
-</mat-toolbar>
-
-<main class="shell">
-  <router-outlet />
-</main>
+      </nav>
+    </mat-sidenav-content>
+  </mat-sidenav-container>
+} @else {
+  <main class="shell shell--auth">
+    <router-outlet />
+  </main>
+}

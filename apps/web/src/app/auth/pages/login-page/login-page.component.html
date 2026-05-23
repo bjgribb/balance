@@ -1,6 +1,14 @@
 <section class="auth-layout">
+  <div class="auth-intro">
+    <p class="auth-brand">Balance</p>
+    <h1>Keep your spending in line with payday.</h1>
+    <p class="auth-copy">
+      Sign in to see your safe-to-spend amount, pay schedule, and recent activity in one place.
+    </p>
+  </div>
+
   <mat-card class="auth-card" appearance="outlined">
-    <h1>Welcome back</h1>
+    <h2>Welcome back</h2>
     <p>Sign in to get back to balancing.</p>
 
     <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
