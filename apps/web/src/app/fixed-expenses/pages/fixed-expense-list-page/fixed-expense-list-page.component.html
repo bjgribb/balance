@@ -1,0 +1,66 @@
+<section class="fixed-expenses-layout">
+  <mat-card class="fixed-expenses-card" appearance="outlined">
+    <mat-card-header class="fixed-expenses-card__header">
+      <mat-card-title class="fixed-expenses-card__title">Fixed Expenses</mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content class="fixed-expenses-card__content">
+      @if (loading()) {
+        <div class="fixed-expenses-card__loading" aria-live="polite">
+          <mat-spinner diameter="28" />
+          <p>Loading your fixed expenses...</p>
+        </div>
+      } @else if (errorMessage()) {
+        <div class="fixed-expenses-card__state fixed-expenses-card__state--error" role="alert">
+          <p>{{ errorMessage() }}</p>
+          <button mat-button type="button" (click)="reload()">Try again</button>
+        </div>
+      } @else if (expenses().length === 0) {
+        <div class="fixed-expenses-card__state">
+          <h2>No fixed expenses yet</h2>
+          <p>Add your first recurring bill in the next iteration.</p>
+        </div>
+      } @else {
+        <ul class="expense-list" aria-label="Fixed expenses list">
+          @for (expense of expenses(); track trackById($index, expense)) {
+            <li class="expense-list__item">
+              <article class="expense-item">
+                <div class="expense-item__main">
+                  <h2>{{ expense.name }}</h2>
+                  <p class="expense-item__amount">
+                    {{ expense.amount | currency: 'USD' : 'symbol' : '1.2-2' }}
+                  </p>
+                </div>
+
+                <mat-chip class="expense-item__status" [highlighted]="expense.isActive">
+                  {{ expense.isActive ? 'Active' : 'Paused' }}
+                </mat-chip>
+
+                <dl class="expense-item__details">
+                  <div>
+                    <dt>Recurs</dt>
+                    <dd>{{ recurrenceLabel(expense) }}</dd>
+                  </div>
+                  <div>
+                    <dt>Anchor date</dt>
+                    <dd>{{ expense.anchorDate | date: 'M/d/yyyy' }}</dd>
+                  </div>
+                  <div>
+                    <dt>Next due</dt>
+                    <dd>
+                      @if (nextDueDateLabel(expense)) {
+                        {{ nextDueDateLabel(expense) | date: 'M/d/yyyy' }}
+                      } @else {
+                        Not scheduled
+                      }
+                    </dd>
+                  </div>
+                </dl>
+              </article>
+            </li>
+          }
+        </ul>
+      }
+    </mat-card-content>
+  </mat-card>
+</section>

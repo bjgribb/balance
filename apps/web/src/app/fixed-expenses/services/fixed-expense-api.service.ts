@@ -1,0 +1,46 @@
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { Injectable, inject, signal } from '@angular/core';
+import { catchError, throwError, type Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
+import { type FixedExpenseResponse } from '../models/fixed-expense.models';
+
+@Injectable({
+  providedIn: 'root',
+})
+export class FixedExpenseApiService {
+  private readonly http = inject(HttpClient);
+  private readonly url = `${environment.apiBaseUrl}/api/fixed-expenses`;
+
+  readonly errorMessage = signal<string | null>(null);
+
+  getAll(): Observable<FixedExpenseResponse[]> {
+    this.errorMessage.set(null);
+
+    return this.http.get<FixedExpenseResponse[]>(this.url).pipe(
+      catchError((error: HttpErrorResponse) => {
+        this.errorMessage.set(this.extractApiError(error));
+        return throwError(() => error);
+      }),
+    );
+  }
+
+  private extractApiError(error: HttpErrorResponse): string {
+    const payload = error.error;
+    if (
+      payload &&
+      typeof payload === 'object' &&
+      Array.isArray((payload as { errors?: unknown }).errors)
+    ) {
+      const errors = (payload as { errors: string[] }).errors;
+      if (errors.length > 0) {
+        return errors.join(' ');
+      }
+    }
+
+    if (error.status === 0) {
+      return 'Cannot reach the API right now. Please check your connection and try again.';
+    }
+
+    return 'Unable to load your fixed expenses right now.';
+  }
+}

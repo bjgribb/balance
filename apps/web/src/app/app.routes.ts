@@ -33,6 +33,14 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'fixed-expenses',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./fixed-expenses/pages/fixed-expense-list-page/fixed-expense-list-page.component').then(
+        (m) => m.FixedExpenseListPageComponent,
+      ),
+  },
+  {
     path: '',
     pathMatch: 'full',
     redirectTo: 'dashboard',

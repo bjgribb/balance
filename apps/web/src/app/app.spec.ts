@@ -4,10 +4,18 @@ import { App } from './app';
 
 describe('App', () => {
   beforeEach(async () => {
+    sessionStorage.setItem('auth.accessToken', 'test-token');
+    sessionStorage.setItem('auth.refreshToken', 'test-refresh');
+    sessionStorage.setItem('auth.accessTokenExpiresAt', (Date.now() + 60_000).toString());
+
     await TestBed.configureTestingModule({
       imports: [App],
       providers: [provideRouter([])],
     }).compileComponents();
+  });
+
+  afterEach(() => {
+    sessionStorage.clear();
   });
 
   it('should create the app', () => {

@@ -1,0 +1,137 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+.fixed-expenses-layout {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.fixed-expenses-card {
+  width: min(760px, 100%);
+  border-radius: 20px;
+  background: color-mix(in srgb, var(--mat-sys-surface) 92%, transparent);
+  padding: 1rem;
+}
+
+.fixed-expenses-card__header {
+  padding-bottom: 1rem;
+}
+
+.fixed-expenses-card__title {
+  font-size: clamp(1.35rem, 6vw, 1.95rem);
+  line-height: 1.15;
+}
+
+.fixed-expenses-card__content {
+  padding-top: 0;
+}
+
+.fixed-expenses-card__loading {
+  min-height: 150px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.fixed-expenses-card__loading p {
+  margin: 0;
+}
+
+.fixed-expenses-card__state {
+  min-height: 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.fixed-expenses-card__state h2,
+.fixed-expenses-card__state p {
+  margin: 0;
+}
+
+.fixed-expenses-card__state--error p {
+  color: var(--mat-sys-error);
+}
+
+.expense-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.expense-item {
+  border: 1px solid color-mix(in srgb, var(--mat-sys-outline-variant) 45%, transparent);
+  border-radius: 16px;
+  padding: 0.9rem;
+  display: grid;
+  gap: 0.65rem;
+}
+
+.expense-item__main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.expense-item__main h2,
+.expense-item__amount {
+  margin: 0;
+}
+
+.expense-item__main h2 {
+  font-size: 1.06rem;
+  line-height: 1.2;
+}
+
+.expense-item__amount {
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.expense-item__status {
+  justify-self: start;
+}
+
+.expense-item__details {
+  margin: 0;
+  display: grid;
+  gap: 0.6rem;
+}
+
+.expense-item__details div {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.expense-item__details dt,
+.expense-item__details dd {
+  margin: 0;
+}
+
+.expense-item__details dt {
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.expense-item__details dd {
+  text-align: right;
+}
+
+@media (min-width: 700px) {
+  .expense-item__main {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+  }
+}

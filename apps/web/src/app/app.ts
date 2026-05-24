@@ -74,6 +74,12 @@ export class App {
       icon: 'calendar_month',
       activeOptions: this.exactMatchOptions,
     },
+    {
+      label: 'Fixed Expenses',
+      route: '/fixed-expenses',
+      icon: 'receipt_long',
+      activeOptions: this.exactMatchOptions,
+    },
   ];
   protected readonly desktopNavItems = this.navItems;
   protected readonly mobileNavItems = this.navItems;
