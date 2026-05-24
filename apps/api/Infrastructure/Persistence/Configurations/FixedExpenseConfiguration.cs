@@ -8,6 +8,17 @@ public class FixedExpenseConfiguration : IEntityTypeConfiguration<FixedExpense>
 {
     public void Configure(EntityTypeBuilder<FixedExpense> builder)
     {
+        builder.ToTable("fixed_expenses", t =>
+        {
+            t.HasCheckConstraint("ck_fixed_expenses_amount_positive", "amount > 0");
+            t.HasCheckConstraint(
+                "ck_fixed_expenses_recurrence_interval_positive",
+                "recurrence_interval IS NULL OR recurrence_interval > 0");
+            t.HasCheckConstraint(
+                "ck_fixed_expenses_recurrence_unit_valid",
+                "recurrence_unit IS NULL OR recurrence_unit IN ('Day', 'Week', 'Month')");
+        });
+
         builder.HasKey(x => x.Id);
 
         builder.Property(x => x.Name)
@@ -24,11 +35,27 @@ public class FixedExpenseConfiguration : IEntityTypeConfiguration<FixedExpense>
         builder.Property(x => x.CreatedAtUtc)
             .IsRequired();
 
+        builder.Property(x => x.AnchorDate)
+            .IsRequired(false);
+
+        builder.Property(x => x.RecurrenceUnit)
+            .HasConversion<string>()
+            .HasMaxLength(10)
+            .IsRequired(false);
+
+        builder.Property(x => x.RecurrenceInterval)
+            .IsRequired(false);
+
+        builder.Property(x => x.SkipUntilDate)
+            .IsRequired(false);
+
         builder.HasOne(x => x.User)
             .WithMany(x => x.FixedExpenses)
             .HasForeignKey(x => x.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasIndex(x => x.UserId);
+
+        builder.HasIndex(x => new { x.UserId, x.IsActive });
     }
 }
