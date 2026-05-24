@@ -8,7 +8,7 @@ public class CurrentUserAccessor(IHttpContextAccessor httpContextAccessor) : ICu
 {
     public bool TryGetUserId(out Guid userId)
     {
-        var user = httpContextAccessor.HttpContext?.User;
+        ClaimsPrincipal? user = httpContextAccessor.HttpContext?.User;
         var id = user?.FindFirstValue(ClaimTypes.NameIdentifier)
             ?? user?.FindFirstValue("sub");
 

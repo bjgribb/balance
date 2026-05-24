@@ -16,12 +16,12 @@ public class PayScheduleController(
     [HttpGet]
     public async Task<ActionResult<PayScheduleResponse>> Get(CancellationToken cancellationToken)
     {
-        if (!currentUserAccessor.TryGetUserId(out var userId))
+        if (!currentUserAccessor.TryGetUserId(out Guid userId))
         {
             return Unauthorized();
         }
 
-        var response = await payScheduleService.GetAsync(userId, cancellationToken);
+        PayScheduleResponse? response = await payScheduleService.GetAsync(userId, cancellationToken);
         return response is null ? NotFound() : Ok(response);
     }
 
@@ -30,12 +30,12 @@ public class PayScheduleController(
         [FromBody] CreatePayScheduleRequest request,
         CancellationToken cancellationToken)
     {
-        if (!currentUserAccessor.TryGetUserId(out var userId))
+        if (!currentUserAccessor.TryGetUserId(out Guid userId))
         {
             return Unauthorized();
         }
 
-        var (response, conflict) = await payScheduleService.CreateAsync(userId, request, cancellationToken);
+        (PayScheduleResponse? response, bool conflict) = await payScheduleService.CreateAsync(userId, request, cancellationToken);
         if (conflict)
         {
             return Conflict(new { errors = new[] { "A pay schedule already exists for this account." } });
@@ -49,12 +49,12 @@ public class PayScheduleController(
         [FromBody] UpdatePayScheduleRequest request,
         CancellationToken cancellationToken)
     {
-        if (!currentUserAccessor.TryGetUserId(out var userId))
+        if (!currentUserAccessor.TryGetUserId(out Guid userId))
         {
             return Unauthorized();
         }
 
-        var response = await payScheduleService.UpdateAsync(userId, request, cancellationToken);
+        PayScheduleResponse? response = await payScheduleService.UpdateAsync(userId, request, cancellationToken);
         return response is null ? NotFound() : Ok(response);
     }
 }

@@ -8,13 +8,13 @@ public class TodoService(ITodoRepository repository) : ITodoService
 {
     public async Task<List<TodoResponse>> GetAllAsync(CancellationToken cancellationToken = default)
     {
-        var todos = await repository.GetAllAsync(cancellationToken);
+        List<TodoItem> todos = await repository.GetAllAsync(cancellationToken);
         return todos.Select(Map).ToList();
     }
 
     public async Task<TodoResponse?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        var todo = await repository.GetByIdAsync(id, cancellationToken);
+        TodoItem? todo = await repository.GetByIdAsync(id, cancellationToken);
         return todo is null ? null : Map(todo);
     }
 
@@ -34,7 +34,7 @@ public class TodoService(ITodoRepository repository) : ITodoService
 
     public async Task<TodoResponse?> UpdateAsync(Guid id, UpdateTodoRequest request, CancellationToken cancellationToken = default)
     {
-        var todo = await repository.GetByIdAsync(id, cancellationToken);
+        TodoItem? todo = await repository.GetByIdAsync(id, cancellationToken);
         if (todo is null)
         {
             return null;
@@ -50,7 +50,7 @@ public class TodoService(ITodoRepository repository) : ITodoService
 
     public async Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        var todo = await repository.GetByIdAsync(id, cancellationToken);
+        TodoItem? todo = await repository.GetByIdAsync(id, cancellationToken);
         if (todo is null)
         {
             return false;

@@ -13,7 +13,7 @@ public class AuthController(IAuthService authService) : ControllerBase
         [FromBody] RegisterRequest request,
         CancellationToken cancellationToken)
     {
-        var (response, errors) = await authService.RegisterAsync(request, cancellationToken);
+        (AuthResponse? response, string[]? errors) = await authService.RegisterAsync(request, cancellationToken);
 
         if (errors.Length > 0)
             return BadRequest(new { errors });
@@ -26,7 +26,7 @@ public class AuthController(IAuthService authService) : ControllerBase
         [FromBody] LoginRequest request,
         CancellationToken cancellationToken)
     {
-        var response = await authService.LoginAsync(request, cancellationToken);
+        AuthResponse? response = await authService.LoginAsync(request, cancellationToken);
 
         if (response is null)
             return Unauthorized();
@@ -39,7 +39,7 @@ public class AuthController(IAuthService authService) : ControllerBase
         [FromBody] RefreshTokenRequest request,
         CancellationToken cancellationToken)
     {
-        var response = await authService.RefreshAsync(request.RefreshToken, cancellationToken);
+        AuthResponse? response = await authService.RefreshAsync(request.RefreshToken, cancellationToken);
 
         if (response is null)
             return Unauthorized();

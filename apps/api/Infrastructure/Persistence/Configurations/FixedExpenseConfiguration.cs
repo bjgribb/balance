@@ -13,10 +13,13 @@ public class FixedExpenseConfiguration : IEntityTypeConfiguration<FixedExpense>
             t.HasCheckConstraint("ck_fixed_expenses_amount_positive", "amount > 0");
             t.HasCheckConstraint(
                 "ck_fixed_expenses_recurrence_interval_positive",
-                "recurrence_interval IS NULL OR recurrence_interval > 0");
+                "recurrence_interval > 0");
             t.HasCheckConstraint(
                 "ck_fixed_expenses_recurrence_unit_valid",
-                "recurrence_unit IS NULL OR recurrence_unit IN ('Day', 'Week', 'Month')");
+                "recurrence_unit IN ('Day', 'Week', 'Month')");
+            t.HasCheckConstraint(
+                "ck_fixed_expenses_skip_until_after_anchor",
+                "skip_until_date IS NULL OR skip_until_date >= anchor_date");
         });
 
         builder.HasKey(x => x.Id);
@@ -29,22 +32,19 @@ public class FixedExpenseConfiguration : IEntityTypeConfiguration<FixedExpense>
             .HasPrecision(18, 2)
             .IsRequired();
 
-        builder.Property(x => x.DueDayOfMonth)
-            .IsRequired();
-
         builder.Property(x => x.CreatedAtUtc)
             .IsRequired();
 
         builder.Property(x => x.AnchorDate)
-            .IsRequired(false);
+            .IsRequired();
 
         builder.Property(x => x.RecurrenceUnit)
             .HasConversion<string>()
             .HasMaxLength(10)
-            .IsRequired(false);
+            .IsRequired();
 
         builder.Property(x => x.RecurrenceInterval)
-            .IsRequired(false);
+            .IsRequired();
 
         builder.Property(x => x.SkipUntilDate)
             .IsRequired(false);

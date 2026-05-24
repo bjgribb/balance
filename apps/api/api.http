@@ -3,6 +3,7 @@
 @userPassword = Password123!
 @accessToken = paste_access_token_here
 @refreshToken = paste_refresh_token_here
+@fixedExpenseId = paste_fixed_expense_id_here
 
 ### Register
 POST {{api_HostAddress}}/api/auth/register
@@ -33,6 +34,46 @@ Content-Type: application/json
 ### Get Todos (Authorized)
 GET {{api_HostAddress}}/api/todos
 Accept: application/json
+Authorization: Bearer {{accessToken}}
+
+###
+
+### Get Fixed Expenses (Authorized)
+GET {{api_HostAddress}}/api/fixed-expenses
+Accept: application/json
+Authorization: Bearer {{accessToken}}
+
+### Create Fixed Expense (Authorized)
+POST {{api_HostAddress}}/api/fixed-expenses
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+	"name": "Internet",
+	"amount": 89.99,
+	"anchorDate": "2026-05-01",
+	"recurrenceUnit": "Week",
+	"recurrenceInterval": 6,
+	"isActive": true
+}
+
+### Update Fixed Expense (Authorized)
+PUT {{api_HostAddress}}/api/fixed-expenses/{{fixedExpenseId}}
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+	"name": "Internet",
+	"amount": 89.99,
+	"anchorDate": "2026-05-01",
+	"recurrenceUnit": "Week",
+	"recurrenceInterval": 6,
+	"isActive": true,
+	"skipUntilDate": "2026-07-01"
+}
+
+### Delete Fixed Expense (Authorized)
+DELETE {{api_HostAddress}}/api/fixed-expenses/{{fixedExpenseId}}
 Authorization: Bearer {{accessToken}}
 
 ###

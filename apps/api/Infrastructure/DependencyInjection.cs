@@ -37,6 +37,7 @@ public static class DependencyInjection
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<ITodoRepository, TodoRepository>();
         services.AddScoped<IPayScheduleRepository, PayScheduleRepository>();
+        services.AddScoped<IFixedExpenseRepository, FixedExpenseRepository>();
 
         return services;
     }

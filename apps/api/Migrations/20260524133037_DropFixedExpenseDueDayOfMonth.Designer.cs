@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using api.Infrastructure.Persistence;
@@ -11,9 +12,11 @@ using api.Infrastructure.Persistence;
 namespace api.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260524133037_DropFixedExpenseDueDayOfMonth")]
+    partial class DropFixedExpenseDueDayOfMonth
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -282,7 +285,7 @@ namespace api.Migrations
                         .HasColumnType("numeric(18,2)")
                         .HasColumnName("amount");
 
-                    b.Property<DateOnly>("AnchorDate")
+                    b.Property<DateOnly?>("AnchorDate")
                         .HasColumnType("date")
                         .HasColumnName("anchor_date");
 
@@ -300,12 +303,11 @@ namespace api.Migrations
                         .HasColumnType("character varying(200)")
                         .HasColumnName("name");
 
-                    b.Property<int>("RecurrenceInterval")
+                    b.Property<int?>("RecurrenceInterval")
                         .HasColumnType("integer")
                         .HasColumnName("recurrence_interval");
 
                     b.Property<string>("RecurrenceUnit")
-                        .IsRequired()
                         .HasMaxLength(10)
                         .HasColumnType("character varying(10)")
                         .HasColumnName("recurrence_unit");
@@ -331,11 +333,9 @@ namespace api.Migrations
                         {
                             t.HasCheckConstraint("ck_fixed_expenses_amount_positive", "amount > 0");
 
-                            t.HasCheckConstraint("ck_fixed_expenses_recurrence_interval_positive", "recurrence_interval > 0");
+                            t.HasCheckConstraint("ck_fixed_expenses_recurrence_interval_positive", "recurrence_interval IS NULL OR recurrence_interval > 0");
 
-                            t.HasCheckConstraint("ck_fixed_expenses_recurrence_unit_valid", "recurrence_unit IN ('Day', 'Week', 'Month')");
-
-                            t.HasCheckConstraint("ck_fixed_expenses_skip_until_after_anchor", "skip_until_date IS NULL OR skip_until_date >= anchor_date");
+                            t.HasCheckConstraint("ck_fixed_expenses_recurrence_unit_valid", "recurrence_unit IS NULL OR recurrence_unit IN ('Day', 'Week', 'Month')");
                         });
                 });
 

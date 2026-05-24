@@ -1,4 +1,5 @@
 using api.Application.Todos;
+using api.Application.FixedExpenses;
 using api.Application.PaySchedules;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -10,6 +11,7 @@ public static class DependencyInjection
     {
         services.AddScoped<ITodoService, TodoService>();
         services.AddScoped<IPayScheduleService, PayScheduleService>();
+        services.AddScoped<IFixedExpenseService, FixedExpenseService>();
         return services;
     }
 }

@@ -8,7 +8,7 @@ public class PayScheduleService(IPayScheduleRepository repository) : IPaySchedul
 {
     public async Task<PayScheduleResponse?> GetAsync(Guid userId, CancellationToken cancellationToken = default)
     {
-        var paySchedule = await repository.GetByUserIdAsync(userId, cancellationToken);
+        PaySchedule? paySchedule = await repository.GetByUserIdAsync(userId, cancellationToken);
         return paySchedule is null ? null : Map(paySchedule);
     }
 
@@ -17,7 +17,7 @@ public class PayScheduleService(IPayScheduleRepository repository) : IPaySchedul
         CreatePayScheduleRequest request,
         CancellationToken cancellationToken = default)
     {
-        var existing = await repository.GetByUserIdAsync(userId, cancellationToken);
+        PaySchedule? existing = await repository.GetByUserIdAsync(userId, cancellationToken);
         if (existing is not null)
         {
             return (null, true);
@@ -42,7 +42,7 @@ public class PayScheduleService(IPayScheduleRepository repository) : IPaySchedul
         UpdatePayScheduleRequest request,
         CancellationToken cancellationToken = default)
     {
-        var paySchedule = await repository.GetByUserIdAsync(userId, cancellationToken);
+        PaySchedule? paySchedule = await repository.GetByUserIdAsync(userId, cancellationToken);
         if (paySchedule is null)
         {
             return null;

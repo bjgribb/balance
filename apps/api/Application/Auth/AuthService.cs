@@ -27,14 +27,14 @@ public class AuthService(
             Email = request.Email,
         };
 
-        var result = await userManager.CreateAsync(user, request.Password);
+        IdentityResult result = await userManager.CreateAsync(user, request.Password);
         if (!result.Succeeded)
         {
             var errors = result.Errors.Select(e => e.Description).ToArray();
             return (null, errors);
         }
 
-        var response = await IssueTokensAsync(user, cancellationToken);
+        AuthResponse response = await IssueTokensAsync(user, cancellationToken);
         return (response, []);
     }
 
@@ -42,7 +42,7 @@ public class AuthService(
         LoginRequest request,
         CancellationToken cancellationToken = default)
     {
-        var user = await userManager.FindByEmailAsync(request.Email);
+        ApplicationUser? user = await userManager.FindByEmailAsync(request.Email);
         if (user is null) return null;
 
         var passwordValid = await userManager.CheckPasswordAsync(user, request.Password);
@@ -55,7 +55,7 @@ public class AuthService(
         string refreshToken,
         CancellationToken cancellationToken = default)
     {
-        var stored = await dbContext.RefreshTokens
+        RefreshToken? stored = await dbContext.RefreshTokens
             .Include(x => x.User)
             .FirstOrDefaultAsync(x => x.Token == refreshToken, cancellationToken);
 
@@ -64,7 +64,7 @@ public class AuthService(
 
         dbContext.RefreshTokens.Remove(stored);
 
-        var response = await IssueTokensAsync(stored.User, cancellationToken);
+        AuthResponse response = await IssueTokensAsync(stored.User, cancellationToken);
         return response;
     }
 
