@@ -103,19 +103,30 @@
 
 .shell {
   box-sizing: border-box;
-  flex: 1 1 0;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  padding: var(--app-content-padding-top) var(--app-content-padding-inline)
-    var(--app-content-padding-bottom);
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: var(--app-content-padding-top) var(--app-content-padding-inline) 0;
+  --app-shell-bottom-space: var(--app-content-padding-bottom);
+}
+
+.shell::after {
+  content: '';
+  display: block;
+  block-size: var(--app-shell-bottom-space);
+}
+
+.shell > :not(router-outlet) {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .shell--auth {
   width: 100%;
   min-height: 100vh;
   min-height: 100dvh;
-  padding-bottom: var(--app-auth-padding-bottom);
+  --app-shell-bottom-space: var(--app-auth-padding-bottom);
 }
 
 .shell--authed {
