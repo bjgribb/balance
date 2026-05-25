@@ -38,6 +38,12 @@ html {
   --app-semantic-danger: #b42318;
   --app-semantic-on-danger: #ffffff;
   --app-semantic-danger-fg: #9b1f16;
+  --app-semantic-success: #1f7a4a;
+  --app-semantic-on-success: #ffffff;
+  --app-semantic-success-fg: #16603a;
+  --app-semantic-warning: #b25e00;
+  --app-semantic-on-warning: #ffffff;
+  --app-semantic-warning-fg: #8a4800;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -55,6 +61,12 @@ html {
   --app-semantic-danger: #d92d20;
   --app-semantic-on-danger: #ffffff;
   --app-semantic-danger-fg: #ff8a80;
+  --app-semantic-success: #2bb673;
+  --app-semantic-on-success: #06150d;
+  --app-semantic-success-fg: #7ef0b8;
+  --app-semantic-warning: #f59e0b;
+  --app-semantic-on-warning: #1a1200;
+  --app-semantic-warning-fg: #ffd58a;
 }
 
 body {
@@ -68,6 +80,28 @@ body {
   // Reset the user agent margin.
   margin: 0;
   height: 100%;
+}
+
+.mat-mdc-snack-bar-container.app-toast-message-pane {
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+}
+
+.mat-mdc-snack-bar-container.app-toast-message-pane .mdc-snackbar__surface {
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+}
+
+.mat-mdc-snack-bar-container.app-toast-message-pane .mat-mdc-snack-bar-label {
+  width: 100%;
+  padding: 0;
+}
+
+.mat-mdc-snack-bar-container.app-toast-message-pane .mdc-snackbar__label,
+.mat-mdc-snack-bar-container.app-toast-message-pane .mat-mdc-snack-bar-label {
+  margin: 0;
 }
 
 /* You can add global styles to this file, and also import other style files */

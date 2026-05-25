@@ -14,6 +14,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { finalize } from 'rxjs';
 import { ConfirmDialogService } from '../../../shared/confirm-dialog/confirm-dialog.service';
+import { ToastMessageService } from '../../../shared/toast-message/toast-message.service';
 import {
   type CreateFixedExpenseRequest,
   type FixedExpenseResponse,
@@ -52,20 +53,15 @@ export class FixedExpenseListPageComponent {
   private readonly fb = inject(FormBuilder);
   private readonly confirmDialog = inject(ConfirmDialogService);
   private readonly fixedExpenseApi = inject(FixedExpenseApiService);
+  private readonly toastMessage = inject(ToastMessageService);
 
   protected readonly loading = signal(true);
   protected readonly saving = signal(false);
   protected readonly updating = signal(false);
   protected readonly deletingExpenseId = signal<string | null>(null);
   protected readonly expenses = signal<FixedExpenseResponse[]>([]);
-  protected readonly errorMessage = signal<string | null>(null);
-  protected readonly createErrorMessage = signal<string | null>(null);
-  protected readonly createSuccessMessage = signal<string | null>(null);
   protected readonly editingExpenseId = signal<string | null>(null);
-  protected readonly updateErrorMessage = signal<string | null>(null);
-  protected readonly updateSuccessMessage = signal<string | null>(null);
-  protected readonly deleteErrorMessage = signal<string | null>(null);
-  protected readonly deleteSuccessMessage = signal<string | null>(null);
+  protected readonly loadError = signal(false);
 
   protected readonly recurrenceOptions: readonly RecurrenceOption[] = [
     { value: RecurrenceUnit.Day, label: 'Day' },
@@ -144,9 +140,6 @@ export class FixedExpenseListPageComponent {
     };
 
     this.saving.set(true);
-    this.createErrorMessage.set(null);
-    this.createSuccessMessage.set(null);
-    this.deleteSuccessMessage.set(null);
 
     this.fixedExpenseApi
       .create(payload)
@@ -154,7 +147,10 @@ export class FixedExpenseListPageComponent {
       .subscribe({
         next: (expense) => {
           this.expenses.update((current) => [expense, ...current]);
-          this.createSuccessMessage.set('Fixed expense added.');
+          this.toastMessage.success(
+            'Fixed expense added',
+            `${expense.name} was added to your list.`,
+          );
           this.createForm.reset({
             name: '',
             amount: null,
@@ -167,7 +163,10 @@ export class FixedExpenseListPageComponent {
         },
         error: (error: HttpErrorResponse) => {
           const fromService = this.fixedExpenseApi.errorMessage();
-          this.createErrorMessage.set(fromService ?? this.extractCreateApiError(error));
+          this.toastMessage.error(
+            'Unable to add fixed expense',
+            fromService ?? this.extractCreateApiError(error),
+          );
         },
       });
   }
@@ -178,9 +177,6 @@ export class FixedExpenseListPageComponent {
 
   protected startEdit(expense: FixedExpenseResponse): void {
     this.editingExpenseId.set(expense.id);
-    this.updateErrorMessage.set(null);
-    this.updateSuccessMessage.set(null);
-    this.deleteSuccessMessage.set(null);
     this.editForm.reset({
       name: expense.name,
       amount: expense.amount,
@@ -194,7 +190,6 @@ export class FixedExpenseListPageComponent {
 
   protected cancelEdit(): void {
     this.editingExpenseId.set(null);
-    this.updateErrorMessage.set(null);
   }
 
   protected submitUpdate(expenseId: string): void {
@@ -215,9 +210,6 @@ export class FixedExpenseListPageComponent {
     };
 
     this.updating.set(true);
-    this.updateErrorMessage.set(null);
-    this.updateSuccessMessage.set(null);
-    this.deleteSuccessMessage.set(null);
 
     this.fixedExpenseApi
       .update(expenseId, payload)
@@ -227,12 +219,18 @@ export class FixedExpenseListPageComponent {
           this.expenses.update((current) =>
             current.map((expense) => (expense.id === updatedExpense.id ? updatedExpense : expense)),
           );
-          this.updateSuccessMessage.set('Fixed expense updated.');
+          this.toastMessage.success(
+            'Fixed expense updated',
+            `${updatedExpense.name} was updated successfully.`,
+          );
           this.editingExpenseId.set(null);
         },
         error: (error: HttpErrorResponse) => {
           const fromService = this.fixedExpenseApi.errorMessage();
-          this.updateErrorMessage.set(fromService ?? this.extractUpdateApiError(error));
+          this.toastMessage.error(
+            'Unable to update fixed expense',
+            fromService ?? this.extractUpdateApiError(error),
+          );
         },
       });
   }
@@ -257,8 +255,6 @@ export class FixedExpenseListPageComponent {
         }
 
         this.deletingExpenseId.set(expense.id);
-        this.deleteErrorMessage.set(null);
-        this.deleteSuccessMessage.set(null);
 
         this.fixedExpenseApi
           .delete(expense.id)
@@ -270,11 +266,17 @@ export class FixedExpenseListPageComponent {
                 this.editingExpenseId.set(null);
               }
 
-              this.deleteSuccessMessage.set('Fixed expense removed.');
+              this.toastMessage.success(
+                'Fixed expense removed',
+                `${expense.name} was removed from your list.`,
+              );
             },
             error: (error: HttpErrorResponse) => {
               const fromService = this.fixedExpenseApi.errorMessage();
-              this.deleteErrorMessage.set(fromService ?? this.extractDeleteApiError(error));
+              this.toastMessage.error(
+                'Unable to remove fixed expense',
+                fromService ?? this.extractDeleteApiError(error),
+              );
             },
           });
       });
@@ -282,7 +284,7 @@ export class FixedExpenseListPageComponent {
 
   private loadExpenses(): void {
     this.loading.set(true);
-    this.errorMessage.set(null);
+    this.loadError.set(false);
 
     this.fixedExpenseApi
       .getAll()
@@ -293,7 +295,11 @@ export class FixedExpenseListPageComponent {
         },
         error: (error: HttpErrorResponse) => {
           const fromService = this.fixedExpenseApi.errorMessage();
-          this.errorMessage.set(fromService ?? this.extractApiError(error));
+          this.loadError.set(true);
+          this.toastMessage.error(
+            'Unable to load fixed expenses',
+            fromService ?? this.extractApiError(error),
+          );
         },
       });
   }

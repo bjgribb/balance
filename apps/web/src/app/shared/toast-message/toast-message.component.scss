@@ -1,0 +1,91 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+.toast-message {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 0.875rem;
+  width: 100%;
+  min-width: 18rem;
+  max-width: 28rem;
+  padding: 0.9rem 1rem;
+  border-radius: 1rem;
+  background: var(--mat-sys-surface-container-high);
+  color: var(--mat-sys-on-surface);
+  box-shadow: var(--mat-sys-level3);
+}
+
+.toast-message__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 999px;
+  background: var(--mat-sys-surface-container);
+}
+
+.toast-message__icon mat-icon {
+  font-size: 1.25rem;
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.toast-message__content {
+  min-width: 0;
+}
+
+.toast-message__title {
+  margin: 0;
+  font: var(--mat-sys-title-small);
+}
+
+.toast-message__message {
+  margin: 0.3rem 0 0;
+  font: var(--mat-sys-body-small);
+}
+
+.toast-message__actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.toast-message--success {
+  border-inline-start: 0.35rem solid var(--app-semantic-success);
+}
+
+.toast-message--success .toast-message__icon {
+  background: color-mix(in srgb, var(--app-semantic-success) 18%, transparent);
+  color: var(--app-semantic-success);
+}
+
+.toast-message--error {
+  border-inline-start: 0.35rem solid var(--app-semantic-danger);
+}
+
+.toast-message--error .toast-message__icon {
+  background: color-mix(in srgb, var(--app-semantic-danger) 18%, transparent);
+  color: var(--app-semantic-danger);
+}
+
+.toast-message--info {
+  border-inline-start: 0.35rem solid var(--mat-sys-primary);
+}
+
+.toast-message--info .toast-message__icon {
+  background: color-mix(in srgb, var(--mat-sys-primary) 18%, transparent);
+  color: var(--mat-sys-primary);
+}
+
+.toast-message--warning {
+  border-inline-start: 0.35rem solid var(--app-semantic-warning);
+}
+
+.toast-message--warning .toast-message__icon {
+  background: color-mix(in srgb, var(--app-semantic-warning) 18%, transparent);
+  color: var(--app-semantic-warning);
+}

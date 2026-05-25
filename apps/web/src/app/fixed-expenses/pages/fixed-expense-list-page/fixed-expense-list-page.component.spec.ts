@@ -5,6 +5,7 @@ import { provideNativeDateAdapter } from '@angular/material/core';
 import { of, throwError } from 'rxjs';
 import { vi } from 'vitest';
 import { ConfirmDialogService } from '../../../shared/confirm-dialog/confirm-dialog.service';
+import { ToastMessageService } from '../../../shared/toast-message/toast-message.service';
 import { RecurrenceUnit } from '../../models/fixed-expense.models';
 import { FixedExpenseApiService } from '../../services/fixed-expense-api.service';
 import { FixedExpenseListPageComponent } from './fixed-expense-list-page.component';
@@ -13,6 +14,13 @@ class ConfirmDialogServiceStub {
   confirmed = true;
 
   readonly confirm = vi.fn().mockImplementation(() => of(this.confirmed));
+}
+
+class ToastMessageServiceStub {
+  readonly success = vi.fn();
+  readonly error = vi.fn();
+  readonly info = vi.fn();
+  readonly warning = vi.fn();
 }
 
 class FixedExpenseApiServiceStub {
@@ -68,16 +76,19 @@ describe('FixedExpenseListPageComponent', () => {
   let fixture: ComponentFixture<FixedExpenseListPageComponent>;
   let apiStub: FixedExpenseApiServiceStub;
   let confirmDialogStub: ConfirmDialogServiceStub;
+  let toastStub: ToastMessageServiceStub;
 
   beforeEach(async () => {
     apiStub = new FixedExpenseApiServiceStub();
     confirmDialogStub = new ConfirmDialogServiceStub();
+    toastStub = new ToastMessageServiceStub();
 
     await TestBed.configureTestingModule({
       imports: [FixedExpenseListPageComponent],
       providers: [
         provideNativeDateAdapter(),
         { provide: ConfirmDialogService, useValue: confirmDialogStub },
+        { provide: ToastMessageService, useValue: toastStub },
         { provide: FixedExpenseApiService, useValue: apiStub },
       ],
     }).compileComponents();
@@ -107,7 +118,11 @@ describe('FixedExpenseListPageComponent', () => {
     fixture.detectChanges();
 
     const html = fixture.nativeElement as HTMLElement;
-    expect(html.textContent).toContain('Unable to load your fixed expenses right now.');
+    expect(html.textContent).toContain('Could not load fixed expenses');
+    expect(toastStub.error).toHaveBeenCalledWith(
+      'Unable to load fixed expenses',
+      'Unable to load your fixed expenses right now.',
+    );
   });
 
   it('submits create form and appends the new expense to the list', () => {
@@ -150,8 +165,12 @@ describe('FixedExpenseListPageComponent', () => {
       isActive: true,
     });
 
+    expect(toastStub.success).toHaveBeenCalledWith(
+      'Fixed expense added',
+      'Internet was added to your list.',
+    );
+
     const html = fixture.nativeElement as HTMLElement;
-    expect(html.textContent).toContain('Fixed expense added.');
     expect(html.textContent).toContain('Internet');
   });
 
@@ -188,8 +207,10 @@ describe('FixedExpenseListPageComponent', () => {
     component.submitCreate();
     fixture.detectChanges();
 
-    const html = fixture.nativeElement as HTMLElement;
-    expect(html.textContent).toContain('Unable to add this fixed expense right now.');
+    expect(toastStub.error).toHaveBeenCalledWith(
+      'Unable to add fixed expense',
+      'Unable to add this fixed expense right now.',
+    );
   });
 
   it('submits edit form and updates the existing expense', () => {
@@ -257,8 +278,12 @@ describe('FixedExpenseListPageComponent', () => {
       isActive: false,
     });
 
+    expect(toastStub.success).toHaveBeenCalledWith(
+      'Fixed expense updated',
+      'Electric Bill Updated was updated successfully.',
+    );
+
     const html = fixture.nativeElement as HTMLElement;
-    expect(html.textContent).toContain('Fixed expense updated.');
     expect(html.textContent).toContain('Electric Bill Updated');
   });
 
@@ -300,8 +325,10 @@ describe('FixedExpenseListPageComponent', () => {
     component.submitUpdate('existing-expense-id');
     fixture.detectChanges();
 
-    const html = fixture.nativeElement as HTMLElement;
-    expect(html.textContent).toContain('Unable to update this fixed expense right now.');
+    expect(toastStub.error).toHaveBeenCalledWith(
+      'Unable to update fixed expense',
+      'Unable to update this fixed expense right now.',
+    );
   });
 
   it('removes an expense when delete is confirmed', () => {
@@ -341,8 +368,12 @@ describe('FixedExpenseListPageComponent', () => {
     expect(confirmDialogStub.confirm).toHaveBeenCalled();
     expect(apiStub.delete).toHaveBeenCalledWith('existing-expense-id');
 
+    expect(toastStub.success).toHaveBeenCalledWith(
+      'Fixed expense removed',
+      'Electric Bill was removed from your list.',
+    );
+
     const html = fixture.nativeElement as HTMLElement;
-    expect(html.textContent).toContain('Fixed expense removed.');
     expect(html.textContent).not.toContain('Electric Bill');
   });
 
@@ -419,8 +450,9 @@ describe('FixedExpenseListPageComponent', () => {
 
     fixture.detectChanges();
 
-    const html = fixture.nativeElement as HTMLElement;
-    expect(html.textContent).toContain('Unable to remove this fixed expense right now.');
-    expect(html.textContent).toContain('Electric Bill');
+    expect(toastStub.error).toHaveBeenCalledWith(
+      'Unable to remove fixed expense',
+      'Unable to remove this fixed expense right now.',
+    );
   });
 });

@@ -1,0 +1,22 @@
+<section
+  class="toast-message"
+  [class.toast-message--success]="data.type === 'success'"
+  [class.toast-message--error]="data.type === 'error'"
+  [class.toast-message--info]="data.type === 'info'"
+  [class.toast-message--warning]="data.type === 'warning'"
+  [attr.role]="data.type === 'error' ? 'alert' : 'status'"
+  [attr.aria-live]="data.type === 'error' ? 'assertive' : 'polite'"
+>
+  <div class="toast-message__icon" aria-hidden="true">
+    <mat-icon>{{ icon }}</mat-icon>
+  </div>
+
+  <div class="toast-message__content">
+    <p class="toast-message__title">{{ data.title }}</p>
+    <p class="toast-message__message">{{ data.message }}</p>
+  </div>
+
+  <div class="toast-message__actions">
+    <button mat-button type="button" (click)="dismiss()">{{ actionLabel }}</button>
+  </div>
+</section>
