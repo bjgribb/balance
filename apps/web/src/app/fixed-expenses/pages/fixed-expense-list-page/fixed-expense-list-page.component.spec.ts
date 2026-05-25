@@ -1,9 +1,8 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { FormGroupDirective } from '@angular/forms';
 import { provideNativeDateAdapter } from '@angular/material/core';
-import { By } from '@angular/platform-browser';
+import { MatDialog } from '@angular/material/dialog';
 import { of, throwError } from 'rxjs';
 import { vi } from 'vitest';
 import { ConfirmDialogService } from '../../../shared/confirm-dialog/confirm-dialog.service';
@@ -23,6 +22,14 @@ class ToastMessageServiceStub {
   readonly error = vi.fn();
   readonly info = vi.fn();
   readonly warning = vi.fn();
+}
+
+class MatDialogStub {
+  nextResult: unknown = undefined;
+
+  readonly open = vi.fn().mockImplementation(() => ({
+    afterClosed: () => of(this.nextResult),
+  }));
 }
 
 class FixedExpenseApiServiceStub {
@@ -78,11 +85,13 @@ describe('FixedExpenseListPageComponent', () => {
   let fixture: ComponentFixture<FixedExpenseListPageComponent>;
   let apiStub: FixedExpenseApiServiceStub;
   let confirmDialogStub: ConfirmDialogServiceStub;
+  let dialogStub: MatDialogStub;
   let toastStub: ToastMessageServiceStub;
 
   beforeEach(async () => {
     apiStub = new FixedExpenseApiServiceStub();
     confirmDialogStub = new ConfirmDialogServiceStub();
+    dialogStub = new MatDialogStub();
     toastStub = new ToastMessageServiceStub();
 
     await TestBed.configureTestingModule({
@@ -90,6 +99,7 @@ describe('FixedExpenseListPageComponent', () => {
       providers: [
         provideNativeDateAdapter(),
         { provide: ConfirmDialogService, useValue: confirmDialogStub },
+        { provide: MatDialog, useValue: dialogStub },
         { provide: ToastMessageService, useValue: toastStub },
         { provide: FixedExpenseApiService, useValue: apiStub },
       ],
@@ -127,34 +137,23 @@ describe('FixedExpenseListPageComponent', () => {
     );
   });
 
-  it('submits create form and appends the new expense to the list', () => {
+  it('creates an expense from the add dialog result and appends it to the list', () => {
     fixture.detectChanges();
-    const component = fixture.componentInstance as unknown as {
-      createForm: {
-        setValue(value: {
-          name: string;
-          amount: number;
-          anchorDate: Date;
-          recurrenceUnit: RecurrenceUnit;
-          recurrenceInterval: number;
-          skipUntilDate: null;
-          isActive: boolean;
-        }): void;
-      };
-      submitCreate(): void;
-    };
-
-    component.createForm.setValue({
+    dialogStub.nextResult = {
       name: 'Internet',
       amount: 79.99,
-      anchorDate: new Date(2026, 4, 5),
+      anchorDate: '2026-05-05',
       recurrenceUnit: RecurrenceUnit.Month,
       recurrenceInterval: 1,
       skipUntilDate: null,
       isActive: true,
-    });
+    };
 
-    component.submitCreate();
+    const component = fixture.componentInstance as unknown as {
+      openAddExpenseDialog(): void;
+    };
+
+    component.openAddExpenseDialog();
     fixture.detectChanges();
 
     expect(apiStub.create).toHaveBeenCalledWith({
@@ -176,79 +175,26 @@ describe('FixedExpenseListPageComponent', () => {
     expect(html.textContent).toContain('Internet');
   });
 
-  it('resets the create form back to untouched after a successful add', () => {
-    fixture.detectChanges();
-
-    const component = fixture.componentInstance as unknown as {
-      createForm: {
-        setValue(value: {
-          name: string;
-          amount: number;
-          anchorDate: Date;
-          recurrenceUnit: RecurrenceUnit;
-          recurrenceInterval: number;
-          skipUntilDate: null;
-          isActive: boolean;
-        }): void;
-        touched: boolean;
-        pristine: boolean;
-      };
-      submitCreate(): void;
-    };
-
-    component.createForm.setValue({
-      name: 'Internet',
-      amount: 79.99,
-      anchorDate: new Date(2026, 4, 5),
-      recurrenceUnit: RecurrenceUnit.Month,
-      recurrenceInterval: 1,
-      skipUntilDate: null,
-      isActive: true,
-    });
-
-    component.submitCreate();
-    fixture.detectChanges();
-
-    const formDirective = fixture.debugElement
-      .query(By.directive(FormGroupDirective))
-      .injector.get(FormGroupDirective);
-
-    expect(component.createForm.touched).toBe(false);
-    expect(component.createForm.pristine).toBe(true);
-    expect(formDirective.submitted).toBe(false);
-  });
-
-  it('shows a create error when adding an expense fails', () => {
+  it('shows a create error when adding from dialog fails', () => {
     fixture.detectChanges();
     apiStub.create.mockReturnValue(
       throwError(() => new HttpErrorResponse({ status: 500, statusText: 'Server Error' })),
     );
-
-    const component = fixture.componentInstance as unknown as {
-      createForm: {
-        setValue(value: {
-          name: string;
-          amount: number;
-          anchorDate: Date;
-          recurrenceUnit: RecurrenceUnit;
-          recurrenceInterval: number;
-          skipUntilDate: null;
-          isActive: boolean;
-        }): void;
-      };
-      submitCreate(): void;
-    };
-    component.createForm.setValue({
+    dialogStub.nextResult = {
       name: 'Internet',
       amount: 79.99,
-      anchorDate: new Date(2026, 4, 5),
+      anchorDate: '2026-05-05',
       recurrenceUnit: RecurrenceUnit.Month,
       recurrenceInterval: 1,
       skipUntilDate: null,
       isActive: true,
-    });
+    };
 
-    component.submitCreate();
+    const component = fixture.componentInstance as unknown as {
+      openAddExpenseDialog(): void;
+    };
+
+    component.openAddExpenseDialog();
     fixture.detectChanges();
 
     expect(toastStub.error).toHaveBeenCalledWith(

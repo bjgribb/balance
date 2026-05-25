@@ -1,7 +1,14 @@
 :host {
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   width: 100%;
+
+  --app-content-padding-inline: 1rem;
+  --app-content-padding-top: 1rem;
+  --app-mobile-nav-clearance: calc(4.75rem + env(safe-area-inset-bottom));
+  --app-content-padding-bottom: calc(var(--app-mobile-nav-clearance) + 1rem);
+  --app-auth-padding-bottom: 1rem;
 
   --app-bg-spot-primary: rgb(236 98 182 / 16%);
   --app-bg-spot-secondary: rgb(130 107 255 / 12%);
@@ -29,7 +36,9 @@
 .app-shell {
   --mat-sidenav-container-shape: 0;
   width: 100%;
-  min-height: 100vh;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
   background:
     radial-gradient(circle at 8% 18%, var(--app-bg-spot-primary), transparent 34%),
     radial-gradient(circle at 86% 80%, var(--app-bg-spot-secondary), transparent 40%),
@@ -54,8 +63,11 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
-  overflow: auto;
+  height: 100vh;
+  height: 100dvh;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .topbar {
@@ -63,7 +75,7 @@
   justify-content: flex-start;
   align-items: center;
   gap: 1rem;
-  padding: 0.9rem 1rem;
+  padding: 0.9rem var(--app-content-padding-inline);
   background: var(--app-surface-frost);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--app-border-soft);
@@ -95,17 +107,20 @@
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  padding: 1rem 1rem 6rem;
+  padding: var(--app-content-padding-top) var(--app-content-padding-inline)
+    var(--app-content-padding-bottom);
 }
 
 .shell--auth {
   width: 100%;
   min-height: 100vh;
-  padding-bottom: 1rem;
+  min-height: 100dvh;
+  padding-bottom: var(--app-auth-padding-bottom);
 }
 
 .shell--authed {
   width: 100%;
+  min-height: 0;
 }
 
 .mobile-nav {
@@ -201,12 +216,19 @@
 }
 
 @media (min-width: 960px) {
+  :host {
+    --app-content-padding-inline: 1.25rem;
+    --app-content-padding-top: 1.5rem;
+    --app-content-padding-bottom: 1.5rem;
+  }
+
   .side-nav {
     display: block;
     box-sizing: border-box;
     border-radius: 0;
     width: 248px;
     height: 100vh;
+    height: 100dvh;
     padding: 0;
     border-right: 1px solid var(--app-border-soft);
     background: color-mix(in srgb, var(--mat-sys-surface) 72%, transparent);
@@ -215,10 +237,6 @@
 
   .topbar {
     display: none;
-  }
-
-  .shell--authed {
-    padding: 1.5rem 1.25rem;
   }
 
   .mobile-nav {

@@ -1,138 +1,20 @@
 <section class="fixed-expenses-layout">
   <mat-card class="fixed-expenses-card" appearance="outlined">
     <mat-card-header class="fixed-expenses-card__header">
-      <mat-card-title class="fixed-expenses-card__title">Fixed Expenses</mat-card-title>
+      <div class="fixed-expenses-card__header-main">
+        <mat-card-title class="fixed-expenses-card__title">Fixed Expenses</mat-card-title>
+        <button
+          mat-flat-button
+          type="button"
+          [disabled]="saving()"
+          (click)="openAddExpenseDialog()"
+        >
+          Add expense
+        </button>
+      </div>
     </mat-card-header>
 
     <mat-card-content class="fixed-expenses-card__content" [attr.aria-busy]="isBusy()">
-      <section class="create-expense">
-        <h2>Add fixed expense</h2>
-
-        <form
-          id="create-fixed-expense-form"
-          class="create-expense__form"
-          [formGroup]="createForm"
-          (ngSubmit)="submitCreate()"
-          novalidate
-        >
-          <mat-form-field class="create-expense__field" appearance="outline">
-            <mat-label>Expense name</mat-label>
-            <input matInput formControlName="name" maxlength="200" />
-            @if (
-              createForm.controls.name.touched && createForm.controls.name.hasError('required')
-            ) {
-              <mat-error>Name is required.</mat-error>
-            }
-            @if (
-              createForm.controls.name.touched && createForm.controls.name.hasError('maxlength')
-            ) {
-              <mat-error>Name must be 200 characters or fewer.</mat-error>
-            }
-          </mat-form-field>
-
-          <div class="create-expense__row">
-            <mat-form-field class="create-expense__field" appearance="outline">
-              <mat-label>Amount</mat-label>
-              <input
-                matInput
-                type="number"
-                inputmode="decimal"
-                min="0.01"
-                step="0.01"
-                formControlName="amount"
-              />
-              <span matTextPrefix>$&nbsp;</span>
-              @if (
-                createForm.controls.amount.touched &&
-                createForm.controls.amount.hasError('required')
-              ) {
-                <mat-error>Amount is required.</mat-error>
-              }
-              @if (
-                createForm.controls.amount.touched && createForm.controls.amount.hasError('min')
-              ) {
-                <mat-error>Amount must be greater than $0.00.</mat-error>
-              }
-            </mat-form-field>
-
-            <mat-form-field class="create-expense__field" appearance="outline">
-              <mat-label>Due date</mat-label>
-              <input matInput [matDatepicker]="anchorDatePicker" formControlName="anchorDate" />
-              <mat-datepicker-toggle matIconSuffix [for]="anchorDatePicker" />
-              <mat-datepicker #anchorDatePicker />
-              @if (
-                createForm.controls.anchorDate.touched &&
-                createForm.controls.anchorDate.hasError('required')
-              ) {
-                <mat-error>Due date is required.</mat-error>
-              }
-            </mat-form-field>
-          </div>
-
-          <div class="create-expense__row">
-            <mat-form-field class="create-expense__field" appearance="outline">
-              <mat-label>Recurrence</mat-label>
-              <mat-select formControlName="recurrenceUnit">
-                @for (option of recurrenceOptions; track option.value) {
-                  <mat-option [value]="option.value">{{ option.label }}</mat-option>
-                }
-              </mat-select>
-              @if (
-                createForm.controls.recurrenceUnit.touched &&
-                createForm.controls.recurrenceUnit.hasError('required')
-              ) {
-                <mat-error>Recurrence is required.</mat-error>
-              }
-            </mat-form-field>
-
-            <mat-form-field class="create-expense__field" appearance="outline">
-              <mat-label>Frequency</mat-label>
-              <input
-                matInput
-                type="number"
-                inputmode="numeric"
-                min="1"
-                step="1"
-                formControlName="recurrenceInterval"
-              />
-              <mat-hint>1 means every recurrence, 2 means every other one.</mat-hint>
-              @if (
-                createForm.controls.recurrenceInterval.touched &&
-                createForm.controls.recurrenceInterval.hasError('required')
-              ) {
-                <mat-error>Recurrence interval is required.</mat-error>
-              }
-              @if (
-                createForm.controls.recurrenceInterval.touched &&
-                createForm.controls.recurrenceInterval.hasError('min')
-              ) {
-                <mat-error>Recurrence interval must be at least 1.</mat-error>
-              }
-            </mat-form-field>
-          </div>
-
-          <mat-form-field class="create-expense__field" appearance="outline">
-            <mat-label>Skip until date (optional)</mat-label>
-            <input matInput [matDatepicker]="skipUntilDatePicker" formControlName="skipUntilDate" />
-            <mat-datepicker-toggle matIconSuffix [for]="skipUntilDatePicker" />
-            <mat-datepicker #skipUntilDatePicker />
-          </mat-form-field>
-
-          <mat-checkbox formControlName="isActive">Expense is active</mat-checkbox>
-
-          <button
-            mat-flat-button
-            class="create-expense__button"
-            type="submit"
-            [disabled]="saving() || createForm.invalid"
-          >
-            {{ saving() ? 'Adding...' : 'Add fixed expense' }}
-          </button>
-        </form>
-      </section>
-
-      <div class="fixed-expenses-card__divider" role="presentation"></div>
-
       @if (loading()) {
         <div class="fixed-expenses-card__loading" aria-live="polite">
           <mat-spinner diameter="28" />
@@ -147,7 +29,7 @@
       } @else if (expenses().length === 0) {
         <div class="fixed-expenses-card__state">
           <h2>No fixed expenses yet</h2>
-          <p>Use the form above to add your first recurring bill.</p>
+          <p>Use Add expense to add your first recurring bill.</p>
         </div>
       } @else {
         <ul class="expense-list" aria-label="Fixed expenses list">

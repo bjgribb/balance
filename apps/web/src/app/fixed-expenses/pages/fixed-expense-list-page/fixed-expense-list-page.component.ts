@@ -1,12 +1,13 @@
 import { CurrencyPipe, DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, ViewChild, inject, signal } from '@angular/core';
-import { FormBuilder, FormGroupDirective, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
@@ -15,6 +16,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { finalize } from 'rxjs';
 import { ConfirmDialogService } from '../../../shared/confirm-dialog/confirm-dialog.service';
 import { ToastMessageService } from '../../../shared/toast-message/toast-message.service';
+import { AddFixedExpenseDialogComponent } from '../../components/add-fixed-expense-dialog/add-fixed-expense-dialog.component';
 import {
   type CreateFixedExpenseRequest,
   type FixedExpenseResponse,
@@ -50,10 +52,8 @@ interface RecurrenceOption {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FixedExpenseListPageComponent {
-  @ViewChild(FormGroupDirective)
-  private readonly createFormDirective?: FormGroupDirective;
-
   private readonly fb = inject(FormBuilder);
+  private readonly dialog = inject(MatDialog);
   private readonly confirmDialog = inject(ConfirmDialogService);
   private readonly fixedExpenseApi = inject(FixedExpenseApiService);
   private readonly toastMessage = inject(ToastMessageService);
@@ -71,19 +71,6 @@ export class FixedExpenseListPageComponent {
     { value: RecurrenceUnit.Week, label: 'Week' },
     { value: RecurrenceUnit.Month, label: 'Month' },
   ];
-
-  protected readonly createForm = this.fb.group({
-    name: this.fb.control('', [Validators.required, Validators.maxLength(200)]),
-    amount: this.fb.control<number | null>(null, [Validators.required, Validators.min(0.01)]),
-    anchorDate: this.fb.control<Date | null>(null, Validators.required),
-    recurrenceUnit: this.fb.control<RecurrenceUnit | null>(
-      RecurrenceUnit.Month,
-      Validators.required,
-    ),
-    recurrenceInterval: this.fb.control<number | null>(1, [Validators.required, Validators.min(1)]),
-    skipUntilDate: this.fb.control<Date | null>(null),
-    isActive: this.fb.control(true, Validators.required),
-  });
 
   protected readonly editForm = this.fb.group({
     name: this.fb.control('', [Validators.required, Validators.maxLength(200)]),
@@ -125,23 +112,25 @@ export class FixedExpenseListPageComponent {
     return this.loading() || this.saving() || this.updating() || this.deletingExpenseId() !== null;
   }
 
-  protected submitCreate(): void {
-    if (this.createForm.invalid) {
-      this.createForm.markAllAsTouched();
-      return;
-    }
+  protected openAddExpenseDialog(): void {
+    this.dialog
+      .open(AddFixedExpenseDialogComponent, {
+        autoFocus: false,
+        restoreFocus: true,
+        width: 'min(42rem, calc(100vw - 1rem))',
+        maxWidth: 'calc(100vw - 1rem)',
+      })
+      .afterClosed()
+      .subscribe((payload: CreateFixedExpenseRequest | undefined) => {
+        if (!payload) {
+          return;
+        }
 
-    const raw = this.createForm.getRawValue();
-    const payload: CreateFixedExpenseRequest = {
-      name: raw.name!.trim(),
-      amount: raw.amount!,
-      anchorDate: this.toApiDate(raw.anchorDate!),
-      recurrenceUnit: raw.recurrenceUnit!,
-      recurrenceInterval: raw.recurrenceInterval!,
-      skipUntilDate: raw.skipUntilDate ? this.toApiDate(raw.skipUntilDate) : null,
-      isActive: raw.isActive!,
-    };
+        this.createExpense(payload);
+      });
+  }
 
+  private createExpense(payload: CreateFixedExpenseRequest): void {
     this.saving.set(true);
 
     this.fixedExpenseApi
@@ -154,17 +143,6 @@ export class FixedExpenseListPageComponent {
             'Fixed expense added',
             `${expense.name} was added to your list.`,
           );
-          const resetValue = {
-            name: '',
-            amount: null,
-            anchorDate: null,
-            recurrenceUnit: RecurrenceUnit.Month,
-            recurrenceInterval: 1,
-            skipUntilDate: null,
-            isActive: true,
-          };
-
-          this.createFormDirective?.resetForm(resetValue);
         },
         error: (error: HttpErrorResponse) => {
           const fromService = this.fixedExpenseApi.errorMessage();
