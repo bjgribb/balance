@@ -33,6 +33,11 @@ html {
 .light-theme {
   @include mat.theme($light-theme);
   color-scheme: light;
+
+  // Semantic destructive tokens used for confirmation dialogs and destructive actions.
+  --app-semantic-danger: #b42318;
+  --app-semantic-on-danger: #ffffff;
+  --app-semantic-danger-fg: #9b1f16;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -45,6 +50,11 @@ html {
 .dark-theme {
   @include mat.theme($dark-theme);
   color-scheme: dark;
+
+  // Slightly brighter destructive color for dark surfaces while keeping text contrast.
+  --app-semantic-danger: #d92d20;
+  --app-semantic-on-danger: #ffffff;
+  --app-semantic-danger-fg: #ff8a80;
 }
 
 body {

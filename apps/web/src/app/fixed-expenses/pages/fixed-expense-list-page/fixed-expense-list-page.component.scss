@@ -158,7 +158,7 @@
 }
 
 .expense-item__delete {
-  color: var(--mat-sys-error);
+  color: var(--app-semantic-danger-fg);
 }
 
 .expense-item__details {
@@ -228,7 +228,7 @@
 }
 
 .fixed-expenses-card__feedback--error {
-  color: var(--mat-sys-error);
+  color: var(--app-semantic-danger-fg);
 }
 
 @media (min-width: 700px) {
