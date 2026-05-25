@@ -1,0 +1,22 @@
+.confirm-dialog__title {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.confirm-dialog__title mat-icon {
+  color: var(--mat-sys-error);
+}
+
+.confirm-dialog__content p {
+  margin: 0;
+}
+
+.confirm-dialog__actions {
+  padding-top: 0.65rem;
+}
+
+.confirm-dialog__confirm--warn {
+  background: color-mix(in srgb, var(--mat-sys-error) 84%, var(--mat-sys-surface));
+  color: var(--mat-sys-on-error);
+}

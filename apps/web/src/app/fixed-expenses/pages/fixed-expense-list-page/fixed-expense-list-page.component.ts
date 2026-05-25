@@ -8,10 +8,12 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { finalize } from 'rxjs';
+import { ConfirmDialogService } from '../../../shared/confirm-dialog/confirm-dialog.service';
 import {
   type CreateFixedExpenseRequest,
   type FixedExpenseResponse,
@@ -35,6 +37,7 @@ interface RecurrenceOption {
     MatChipsModule,
     MatDatepickerModule,
     MatFormFieldModule,
+    MatIconModule,
     MatInputModule,
     MatProgressSpinnerModule,
     MatSelectModule,
@@ -47,6 +50,7 @@ interface RecurrenceOption {
 })
 export class FixedExpenseListPageComponent {
   private readonly fb = inject(FormBuilder);
+  private readonly confirmDialog = inject(ConfirmDialogService);
   private readonly fixedExpenseApi = inject(FixedExpenseApiService);
 
   protected readonly loading = signal(true);
@@ -64,9 +68,9 @@ export class FixedExpenseListPageComponent {
   protected readonly deleteSuccessMessage = signal<string | null>(null);
 
   protected readonly recurrenceOptions: readonly RecurrenceOption[] = [
-    { value: RecurrenceUnit.Day, label: 'Day(s)' },
-    { value: RecurrenceUnit.Week, label: 'Week(s)' },
-    { value: RecurrenceUnit.Month, label: 'Month(s)' },
+    { value: RecurrenceUnit.Day, label: 'Day' },
+    { value: RecurrenceUnit.Week, label: 'Week' },
+    { value: RecurrenceUnit.Month, label: 'Month' },
   ];
 
   protected readonly createForm = this.fb.group({
@@ -116,6 +120,10 @@ export class FixedExpenseListPageComponent {
 
   protected reload(): void {
     this.loadExpenses();
+  }
+
+  protected isBusy(): boolean {
+    return this.loading() || this.saving() || this.updating() || this.deletingExpenseId() !== null;
   }
 
   protected submitCreate(): void {
@@ -234,31 +242,41 @@ export class FixedExpenseListPageComponent {
   }
 
   protected deleteExpense(expense: FixedExpenseResponse): void {
-    const confirmed = this.confirmDelete(expense.name);
-    if (!confirmed) {
-      return;
-    }
+    this.confirmDialog
+      .confirm({
+        title: 'Remove Fixed Expense?',
+        message: `This will permanently remove ${expense.name} from your fixed expenses. This action cannot be undone.`,
+        confirmLabel: 'Remove',
+        cancelLabel: 'Cancel',
+        confirmColor: 'warn',
+        icon: 'warning',
+      })
+      .subscribe((confirmed: boolean) => {
+        if (!confirmed) {
+          return;
+        }
 
-    this.deletingExpenseId.set(expense.id);
-    this.deleteErrorMessage.set(null);
-    this.deleteSuccessMessage.set(null);
+        this.deletingExpenseId.set(expense.id);
+        this.deleteErrorMessage.set(null);
+        this.deleteSuccessMessage.set(null);
 
-    this.fixedExpenseApi
-      .delete(expense.id)
-      .pipe(finalize(() => this.deletingExpenseId.set(null)))
-      .subscribe({
-        next: () => {
-          this.expenses.update((current) => current.filter((item) => item.id !== expense.id));
-          if (this.editingExpenseId() === expense.id) {
-            this.editingExpenseId.set(null);
-          }
+        this.fixedExpenseApi
+          .delete(expense.id)
+          .pipe(finalize(() => this.deletingExpenseId.set(null)))
+          .subscribe({
+            next: () => {
+              this.expenses.update((current) => current.filter((item) => item.id !== expense.id));
+              if (this.editingExpenseId() === expense.id) {
+                this.editingExpenseId.set(null);
+              }
 
-          this.deleteSuccessMessage.set('Fixed expense removed.');
-        },
-        error: (error: HttpErrorResponse) => {
-          const fromService = this.fixedExpenseApi.errorMessage();
-          this.deleteErrorMessage.set(fromService ?? this.extractDeleteApiError(error));
-        },
+              this.deleteSuccessMessage.set('Fixed expense removed.');
+            },
+            error: (error: HttpErrorResponse) => {
+              const fromService = this.fixedExpenseApi.errorMessage();
+              this.deleteErrorMessage.set(fromService ?? this.extractDeleteApiError(error));
+            },
+          });
       });
   }
 
@@ -323,10 +341,6 @@ export class FixedExpenseListPageComponent {
     }
 
     return 'Unable to remove this fixed expense right now.';
-  }
-
-  private confirmDelete(name: string): boolean {
-    return window.confirm(`Delete fixed expense "${name}"?`);
   }
 
   private toApiDate(value: Date): string {

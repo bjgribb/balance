@@ -4,9 +4,16 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { of, throwError } from 'rxjs';
 import { vi } from 'vitest';
+import { ConfirmDialogService } from '../../../shared/confirm-dialog/confirm-dialog.service';
 import { RecurrenceUnit } from '../../models/fixed-expense.models';
 import { FixedExpenseApiService } from '../../services/fixed-expense-api.service';
 import { FixedExpenseListPageComponent } from './fixed-expense-list-page.component';
+
+class ConfirmDialogServiceStub {
+  confirmed = true;
+
+  readonly confirm = vi.fn().mockImplementation(() => of(this.confirmed));
+}
 
 class FixedExpenseApiServiceStub {
   readonly errorMessage = signal<string | null>(null);
@@ -60,14 +67,17 @@ class FixedExpenseApiServiceStub {
 describe('FixedExpenseListPageComponent', () => {
   let fixture: ComponentFixture<FixedExpenseListPageComponent>;
   let apiStub: FixedExpenseApiServiceStub;
+  let confirmDialogStub: ConfirmDialogServiceStub;
 
   beforeEach(async () => {
     apiStub = new FixedExpenseApiServiceStub();
+    confirmDialogStub = new ConfirmDialogServiceStub();
 
     await TestBed.configureTestingModule({
       imports: [FixedExpenseListPageComponent],
       providers: [
         provideNativeDateAdapter(),
+        { provide: ConfirmDialogService, useValue: confirmDialogStub },
         { provide: FixedExpenseApiService, useValue: apiStub },
       ],
     }).compileComponents();
@@ -296,7 +306,7 @@ describe('FixedExpenseListPageComponent', () => {
 
   it('removes an expense when delete is confirmed', () => {
     fixture.detectChanges();
-    vi.spyOn(window, 'confirm').mockReturnValue(true);
+    confirmDialogStub.confirmed = true;
 
     const component = fixture.componentInstance as unknown as {
       deleteExpense(expense: {
@@ -328,6 +338,7 @@ describe('FixedExpenseListPageComponent', () => {
 
     fixture.detectChanges();
 
+    expect(confirmDialogStub.confirm).toHaveBeenCalled();
     expect(apiStub.delete).toHaveBeenCalledWith('existing-expense-id');
 
     const html = fixture.nativeElement as HTMLElement;
@@ -337,7 +348,7 @@ describe('FixedExpenseListPageComponent', () => {
 
   it('does not call delete when confirmation is canceled', () => {
     fixture.detectChanges();
-    vi.spyOn(window, 'confirm').mockReturnValue(false);
+    confirmDialogStub.confirmed = false;
 
     const component = fixture.componentInstance as unknown as {
       deleteExpense(expense: {
@@ -367,12 +378,13 @@ describe('FixedExpenseListPageComponent', () => {
       createdAtUtc: '2026-05-01T00:00:00Z',
     });
 
+    expect(confirmDialogStub.confirm).toHaveBeenCalled();
     expect(apiStub.delete).not.toHaveBeenCalled();
   });
 
   it('shows a delete error when removing an expense fails', () => {
     fixture.detectChanges();
-    vi.spyOn(window, 'confirm').mockReturnValue(true);
+    confirmDialogStub.confirmed = true;
     apiStub.delete.mockReturnValue(
       throwError(() => new HttpErrorResponse({ status: 500, statusText: 'Server Error' })),
     );

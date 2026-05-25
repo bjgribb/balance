@@ -4,7 +4,7 @@
       <mat-card-title class="fixed-expenses-card__title">Fixed Expenses</mat-card-title>
     </mat-card-header>
 
-    <mat-card-content class="fixed-expenses-card__content">
+    <mat-card-content class="fixed-expenses-card__content" [attr.aria-busy]="isBusy()">
       <section class="create-expense">
         <h2>Add fixed expense</h2>
 
@@ -56,7 +56,7 @@
             </mat-form-field>
 
             <mat-form-field class="create-expense__field" appearance="outline">
-              <mat-label>Anchor date</mat-label>
+              <mat-label>Due date</mat-label>
               <input matInput [matDatepicker]="anchorDatePicker" formControlName="anchorDate" />
               <mat-datepicker-toggle matIconSuffix [for]="anchorDatePicker" />
               <mat-datepicker #anchorDatePicker />
@@ -64,14 +64,14 @@
                 createForm.controls.anchorDate.touched &&
                 createForm.controls.anchorDate.hasError('required')
               ) {
-                <mat-error>Anchor date is required.</mat-error>
+                <mat-error>Due date is required.</mat-error>
               }
             </mat-form-field>
           </div>
 
           <div class="create-expense__row">
             <mat-form-field class="create-expense__field" appearance="outline">
-              <mat-label>Recurrence unit</mat-label>
+              <mat-label>Recurrence</mat-label>
               <mat-select formControlName="recurrenceUnit">
                 @for (option of recurrenceOptions; track option.value) {
                   <mat-option [value]="option.value">{{ option.label }}</mat-option>
@@ -81,12 +81,12 @@
                 createForm.controls.recurrenceUnit.touched &&
                 createForm.controls.recurrenceUnit.hasError('required')
               ) {
-                <mat-error>Recurrence unit is required.</mat-error>
+                <mat-error>Recurrence is required.</mat-error>
               }
             </mat-form-field>
 
             <mat-form-field class="create-expense__field" appearance="outline">
-              <mat-label>Every # units</mat-label>
+              <mat-label>Frequency</mat-label>
               <input
                 matInput
                 type="number"
@@ -95,6 +95,7 @@
                 step="1"
                 formControlName="recurrenceInterval"
               />
+              <mat-hint>1 means every recurrence, 2 means every other one.</mat-hint>
               @if (
                 createForm.controls.recurrenceInterval.touched &&
                 createForm.controls.recurrenceInterval.hasError('required')
@@ -138,7 +139,7 @@
             mat-flat-button
             class="create-expense__button"
             type="submit"
-            [disabled]="saving()"
+            [disabled]="saving() || createForm.invalid"
           >
             {{ saving() ? 'Adding...' : 'Add fixed expense' }}
           </button>
@@ -175,15 +176,24 @@
                 </div>
 
                 <div class="expense-item__actions">
-                  <button mat-button type="button" (click)="startEdit(expense)">Edit</button>
                   <button
-                    mat-button
+                    mat-icon-button
+                    type="button"
+                    [disabled]="isDeleting(expense.id)"
+                    [attr.aria-label]="'Edit ' + expense.name"
+                    (click)="startEdit(expense)"
+                  >
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                  <button
+                    mat-icon-button
                     type="button"
                     class="expense-item__delete"
                     [disabled]="isDeleting(expense.id)"
+                    [attr.aria-label]="'Remove ' + expense.name"
                     (click)="deleteExpense(expense)"
                   >
-                    {{ isDeleting(expense.id) ? 'Removing...' : 'Remove' }}
+                    <mat-icon>{{ isDeleting(expense.id) ? 'hourglass_top' : 'delete' }}</mat-icon>
                   </button>
                 </div>
 
@@ -193,11 +203,11 @@
 
                 <dl class="expense-item__details">
                   <div>
-                    <dt>Recurs</dt>
+                    <dt>Recurrence</dt>
                     <dd>{{ recurrenceLabel(expense) }}</dd>
                   </div>
                   <div>
-                    <dt>Anchor date</dt>
+                    <dt>Due date</dt>
                     <dd>{{ expense.anchorDate | date: 'M/d/yyyy' }}</dd>
                   </div>
                   <div>
@@ -263,7 +273,7 @@
                       </mat-form-field>
 
                       <mat-form-field class="expense-item__field" appearance="outline">
-                        <mat-label>Anchor date</mat-label>
+                        <mat-label>Due date</mat-label>
                         <input
                           matInput
                           [matDatepicker]="editAnchorDatePicker"
@@ -275,14 +285,14 @@
                           editForm.controls.anchorDate.touched &&
                           editForm.controls.anchorDate.hasError('required')
                         ) {
-                          <mat-error>Anchor date is required.</mat-error>
+                          <mat-error>Due date is required.</mat-error>
                         }
                       </mat-form-field>
                     </div>
 
                     <div class="expense-item__row">
                       <mat-form-field class="expense-item__field" appearance="outline">
-                        <mat-label>Recurrence unit</mat-label>
+                        <mat-label>Recurrence</mat-label>
                         <mat-select formControlName="recurrenceUnit">
                           @for (option of recurrenceOptions; track option.value) {
                             <mat-option [value]="option.value">{{ option.label }}</mat-option>
@@ -292,12 +302,12 @@
                           editForm.controls.recurrenceUnit.touched &&
                           editForm.controls.recurrenceUnit.hasError('required')
                         ) {
-                          <mat-error>Recurrence unit is required.</mat-error>
+                          <mat-error>Recurrence is required.</mat-error>
                         }
                       </mat-form-field>
 
                       <mat-form-field class="expense-item__field" appearance="outline">
-                        <mat-label>Every # units</mat-label>
+                        <mat-label>Frequency</mat-label>
                         <input
                           matInput
                           type="number"
@@ -306,6 +316,7 @@
                           step="1"
                           formControlName="recurrenceInterval"
                         />
+                        <mat-hint>1 means every recurrence, 2 means every other one.</mat-hint>
                         @if (
                           editForm.controls.recurrenceInterval.touched &&
                           editForm.controls.recurrenceInterval.hasError('required')
@@ -342,7 +353,11 @@
 
                     <div class="expense-item__edit-actions">
                       <button mat-button type="button" (click)="cancelEdit()">Cancel</button>
-                      <button mat-flat-button type="submit" [disabled]="updating()">
+                      <button
+                        mat-flat-button
+                        type="submit"
+                        [disabled]="updating() || editForm.invalid"
+                      >
                         {{ updating() ? 'Saving...' : 'Save changes' }}
                       </button>
                     </div>
