@@ -5,6 +5,148 @@
     </mat-card-header>
 
     <mat-card-content class="fixed-expenses-card__content">
+      <section class="create-expense">
+        <h2>Add fixed expense</h2>
+
+        <form
+          id="create-fixed-expense-form"
+          class="create-expense__form"
+          [formGroup]="createForm"
+          (ngSubmit)="submitCreate()"
+          novalidate
+        >
+          <mat-form-field class="create-expense__field" appearance="outline">
+            <mat-label>Expense name</mat-label>
+            <input matInput formControlName="name" maxlength="200" />
+            @if (
+              createForm.controls.name.touched && createForm.controls.name.hasError('required')
+            ) {
+              <mat-error>Name is required.</mat-error>
+            }
+            @if (
+              createForm.controls.name.touched && createForm.controls.name.hasError('maxlength')
+            ) {
+              <mat-error>Name must be 200 characters or fewer.</mat-error>
+            }
+          </mat-form-field>
+
+          <div class="create-expense__row">
+            <mat-form-field class="create-expense__field" appearance="outline">
+              <mat-label>Amount</mat-label>
+              <input
+                matInput
+                type="number"
+                inputmode="decimal"
+                min="0.01"
+                step="0.01"
+                formControlName="amount"
+              />
+              <span matTextPrefix>$&nbsp;</span>
+              @if (
+                createForm.controls.amount.touched &&
+                createForm.controls.amount.hasError('required')
+              ) {
+                <mat-error>Amount is required.</mat-error>
+              }
+              @if (
+                createForm.controls.amount.touched && createForm.controls.amount.hasError('min')
+              ) {
+                <mat-error>Amount must be greater than $0.00.</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field class="create-expense__field" appearance="outline">
+              <mat-label>Anchor date</mat-label>
+              <input matInput [matDatepicker]="anchorDatePicker" formControlName="anchorDate" />
+              <mat-datepicker-toggle matIconSuffix [for]="anchorDatePicker" />
+              <mat-datepicker #anchorDatePicker />
+              @if (
+                createForm.controls.anchorDate.touched &&
+                createForm.controls.anchorDate.hasError('required')
+              ) {
+                <mat-error>Anchor date is required.</mat-error>
+              }
+            </mat-form-field>
+          </div>
+
+          <div class="create-expense__row">
+            <mat-form-field class="create-expense__field" appearance="outline">
+              <mat-label>Recurrence unit</mat-label>
+              <mat-select formControlName="recurrenceUnit">
+                @for (option of recurrenceOptions; track option.value) {
+                  <mat-option [value]="option.value">{{ option.label }}</mat-option>
+                }
+              </mat-select>
+              @if (
+                createForm.controls.recurrenceUnit.touched &&
+                createForm.controls.recurrenceUnit.hasError('required')
+              ) {
+                <mat-error>Recurrence unit is required.</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field class="create-expense__field" appearance="outline">
+              <mat-label>Every # units</mat-label>
+              <input
+                matInput
+                type="number"
+                inputmode="numeric"
+                min="1"
+                step="1"
+                formControlName="recurrenceInterval"
+              />
+              @if (
+                createForm.controls.recurrenceInterval.touched &&
+                createForm.controls.recurrenceInterval.hasError('required')
+              ) {
+                <mat-error>Recurrence interval is required.</mat-error>
+              }
+              @if (
+                createForm.controls.recurrenceInterval.touched &&
+                createForm.controls.recurrenceInterval.hasError('min')
+              ) {
+                <mat-error>Recurrence interval must be at least 1.</mat-error>
+              }
+            </mat-form-field>
+          </div>
+
+          <mat-form-field class="create-expense__field" appearance="outline">
+            <mat-label>Skip until date (optional)</mat-label>
+            <input matInput [matDatepicker]="skipUntilDatePicker" formControlName="skipUntilDate" />
+            <mat-datepicker-toggle matIconSuffix [for]="skipUntilDatePicker" />
+            <mat-datepicker #skipUntilDatePicker />
+          </mat-form-field>
+
+          <mat-checkbox formControlName="isActive">Expense is active</mat-checkbox>
+
+          @if (createErrorMessage()) {
+            <p class="create-expense__feedback create-expense__feedback--error" role="alert">
+              {{ createErrorMessage() }}
+            </p>
+          }
+
+          @if (createSuccessMessage()) {
+            <p
+              class="create-expense__feedback create-expense__feedback--success"
+              aria-live="polite"
+            >
+              {{ createSuccessMessage() }}
+            </p>
+          }
+
+          <button
+            mat-flat-button
+            class="create-expense__button"
+            type="submit"
+            [disabled]="saving()"
+          >
+            {{ saving() ? 'Adding...' : 'Add fixed expense' }}
+          </button>
+        </form>
+      </section>
+
+      <div class="fixed-expenses-card__divider" role="presentation"></div>
+
       @if (loading()) {
         <div class="fixed-expenses-card__loading" aria-live="polite">
           <mat-spinner diameter="28" />
@@ -18,7 +160,7 @@
       } @else if (expenses().length === 0) {
         <div class="fixed-expenses-card__state">
           <h2>No fixed expenses yet</h2>
-          <p>Add your first recurring bill in the next iteration.</p>
+          <p>Use the form above to add your first recurring bill.</p>
         </div>
       } @else {
         <ul class="expense-list" aria-label="Fixed expenses list">

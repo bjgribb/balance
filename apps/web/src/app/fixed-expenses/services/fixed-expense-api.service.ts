@@ -2,7 +2,10 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable, inject, signal } from '@angular/core';
 import { catchError, throwError, type Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { type FixedExpenseResponse } from '../models/fixed-expense.models';
+import {
+  type CreateFixedExpenseRequest,
+  type FixedExpenseResponse,
+} from '../models/fixed-expense.models';
 
 @Injectable({
   providedIn: 'root',
@@ -18,13 +21,28 @@ export class FixedExpenseApiService {
 
     return this.http.get<FixedExpenseResponse[]>(this.url).pipe(
       catchError((error: HttpErrorResponse) => {
-        this.errorMessage.set(this.extractApiError(error));
+        this.errorMessage.set(
+          this.extractApiError(error, 'Unable to load your fixed expenses right now.'),
+        );
         return throwError(() => error);
       }),
     );
   }
 
-  private extractApiError(error: HttpErrorResponse): string {
+  create(request: CreateFixedExpenseRequest): Observable<FixedExpenseResponse> {
+    this.errorMessage.set(null);
+
+    return this.http.post<FixedExpenseResponse>(this.url, request).pipe(
+      catchError((error: HttpErrorResponse) => {
+        this.errorMessage.set(
+          this.extractApiError(error, 'Unable to add this fixed expense right now.'),
+        );
+        return throwError(() => error);
+      }),
+    );
+  }
+
+  private extractApiError(error: HttpErrorResponse, fallback: string): string {
     const payload = error.error;
     if (
       payload &&
@@ -41,6 +59,6 @@ export class FixedExpenseApiService {
       return 'Cannot reach the API right now. Please check your connection and try again.';
     }
 
-    return 'Unable to load your fixed expenses right now.';
+    return fallback;
   }
 }

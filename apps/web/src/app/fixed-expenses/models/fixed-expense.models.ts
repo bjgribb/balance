@@ -4,6 +4,16 @@ export enum RecurrenceUnit {
   Month = 2,
 }
 
+export interface CreateFixedExpenseRequest {
+  name: string;
+  amount: number;
+  anchorDate: string;
+  recurrenceUnit: RecurrenceUnit;
+  recurrenceInterval: number;
+  isActive: boolean;
+  skipUntilDate: string | null;
+}
+
 export interface FixedExpenseResponse {
   id: string;
   name: string;
