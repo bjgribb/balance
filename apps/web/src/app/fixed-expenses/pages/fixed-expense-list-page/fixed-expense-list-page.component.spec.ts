@@ -1,7 +1,9 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { FormGroupDirective } from '@angular/forms';
 import { provideNativeDateAdapter } from '@angular/material/core';
+import { By } from '@angular/platform-browser';
 import { of, throwError } from 'rxjs';
 import { vi } from 'vitest';
 import { ConfirmDialogService } from '../../../shared/confirm-dialog/confirm-dialog.service';
@@ -172,6 +174,48 @@ describe('FixedExpenseListPageComponent', () => {
 
     const html = fixture.nativeElement as HTMLElement;
     expect(html.textContent).toContain('Internet');
+  });
+
+  it('resets the create form back to untouched after a successful add', () => {
+    fixture.detectChanges();
+
+    const component = fixture.componentInstance as unknown as {
+      createForm: {
+        setValue(value: {
+          name: string;
+          amount: number;
+          anchorDate: Date;
+          recurrenceUnit: RecurrenceUnit;
+          recurrenceInterval: number;
+          skipUntilDate: null;
+          isActive: boolean;
+        }): void;
+        touched: boolean;
+        pristine: boolean;
+      };
+      submitCreate(): void;
+    };
+
+    component.createForm.setValue({
+      name: 'Internet',
+      amount: 79.99,
+      anchorDate: new Date(2026, 4, 5),
+      recurrenceUnit: RecurrenceUnit.Month,
+      recurrenceInterval: 1,
+      skipUntilDate: null,
+      isActive: true,
+    });
+
+    component.submitCreate();
+    fixture.detectChanges();
+
+    const formDirective = fixture.debugElement
+      .query(By.directive(FormGroupDirective))
+      .injector.get(FormGroupDirective);
+
+    expect(component.createForm.touched).toBe(false);
+    expect(component.createForm.pristine).toBe(true);
+    expect(formDirective.submitted).toBe(false);
   });
 
   it('shows a create error when adding an expense fails', () => {

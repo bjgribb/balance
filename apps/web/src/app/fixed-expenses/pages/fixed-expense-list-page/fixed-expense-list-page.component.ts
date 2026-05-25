@@ -1,7 +1,7 @@
 import { CurrencyPipe, DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ChangeDetectionStrategy, Component, ViewChild, inject, signal } from '@angular/core';
+import { FormBuilder, FormGroupDirective, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatCheckboxModule } from '@angular/material/checkbox';
@@ -50,6 +50,9 @@ interface RecurrenceOption {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FixedExpenseListPageComponent {
+  @ViewChild(FormGroupDirective)
+  private readonly createFormDirective?: FormGroupDirective;
+
   private readonly fb = inject(FormBuilder);
   private readonly confirmDialog = inject(ConfirmDialogService);
   private readonly fixedExpenseApi = inject(FixedExpenseApiService);
@@ -151,7 +154,7 @@ export class FixedExpenseListPageComponent {
             'Fixed expense added',
             `${expense.name} was added to your list.`,
           );
-          this.createForm.reset({
+          const resetValue = {
             name: '',
             amount: null,
             anchorDate: null,
@@ -159,7 +162,9 @@ export class FixedExpenseListPageComponent {
             recurrenceInterval: 1,
             skipUntilDate: null,
             isActive: true,
-          });
+          };
+
+          this.createFormDirective?.resetForm(resetValue);
         },
         error: (error: HttpErrorResponse) => {
           const fromService = this.fixedExpenseApi.errorMessage();
