@@ -10,7 +10,22 @@ import { FixedExpenseListPageComponent } from './fixed-expense-list-page.compone
 
 class FixedExpenseApiServiceStub {
   readonly errorMessage = signal<string | null>(null);
-  readonly getAll = vi.fn().mockReturnValue(of([]));
+  readonly getAll = vi.fn().mockReturnValue(
+    of([
+      {
+        id: 'existing-expense-id',
+        name: 'Electric Bill',
+        amount: 120,
+        isActive: true,
+        anchorDate: '2026-05-01',
+        recurrenceUnit: RecurrenceUnit.Month,
+        recurrenceInterval: 1,
+        skipUntilDate: null,
+        nextDueDate: '2026-06-01',
+        createdAtUtc: '2026-05-01T00:00:00Z',
+      },
+    ]),
+  );
   readonly create = vi.fn().mockReturnValue(
     of({
       id: 'created-expense-id',
@@ -22,6 +37,20 @@ class FixedExpenseApiServiceStub {
       recurrenceInterval: 1,
       skipUntilDate: null,
       nextDueDate: '2026-06-05',
+      createdAtUtc: '2026-05-01T00:00:00Z',
+    }),
+  );
+  readonly update = vi.fn().mockReturnValue(
+    of({
+      id: 'existing-expense-id',
+      name: 'Electric Bill Updated',
+      amount: 125,
+      isActive: false,
+      anchorDate: '2026-05-10',
+      recurrenceUnit: RecurrenceUnit.Month,
+      recurrenceInterval: 1,
+      skipUntilDate: null,
+      nextDueDate: null,
       createdAtUtc: '2026-05-01T00:00:00Z',
     }),
   );
@@ -46,6 +75,8 @@ describe('FixedExpenseListPageComponent', () => {
   });
 
   it('shows an empty state when no fixed expenses exist', () => {
+    apiStub.getAll.mockReturnValue(of([]));
+    fixture = TestBed.createComponent(FixedExpenseListPageComponent);
     fixture.detectChanges();
 
     const html = fixture.nativeElement as HTMLElement;
@@ -144,5 +175,117 @@ describe('FixedExpenseListPageComponent', () => {
 
     const html = fixture.nativeElement as HTMLElement;
     expect(html.textContent).toContain('Unable to add this fixed expense right now.');
+  });
+
+  it('submits edit form and updates the existing expense', () => {
+    fixture.detectChanges();
+    const component = fixture.componentInstance as unknown as {
+      startEdit(expense: {
+        id: string;
+        name: string;
+        amount: number;
+        isActive: boolean;
+        anchorDate: string;
+        recurrenceUnit: RecurrenceUnit;
+        recurrenceInterval: number;
+        skipUntilDate: string | null;
+        nextDueDate: string | null;
+        createdAtUtc: string;
+      }): void;
+      editForm: {
+        setValue(value: {
+          name: string;
+          amount: number;
+          anchorDate: Date;
+          recurrenceUnit: RecurrenceUnit;
+          recurrenceInterval: number;
+          skipUntilDate: null;
+          isActive: boolean;
+        }): void;
+      };
+      submitUpdate(expenseId: string): void;
+    };
+
+    component.startEdit({
+      id: 'existing-expense-id',
+      name: 'Electric Bill',
+      amount: 120,
+      isActive: true,
+      anchorDate: '2026-05-01',
+      recurrenceUnit: RecurrenceUnit.Month,
+      recurrenceInterval: 1,
+      skipUntilDate: null,
+      nextDueDate: '2026-06-01',
+      createdAtUtc: '2026-05-01T00:00:00Z',
+    });
+
+    component.editForm.setValue({
+      name: 'Electric Bill Updated',
+      amount: 125,
+      anchorDate: new Date(2026, 4, 10),
+      recurrenceUnit: RecurrenceUnit.Month,
+      recurrenceInterval: 1,
+      skipUntilDate: null,
+      isActive: false,
+    });
+
+    component.submitUpdate('existing-expense-id');
+    fixture.detectChanges();
+
+    expect(apiStub.update).toHaveBeenCalledWith('existing-expense-id', {
+      name: 'Electric Bill Updated',
+      amount: 125,
+      anchorDate: '2026-05-10',
+      recurrenceUnit: RecurrenceUnit.Month,
+      recurrenceInterval: 1,
+      skipUntilDate: null,
+      isActive: false,
+    });
+
+    const html = fixture.nativeElement as HTMLElement;
+    expect(html.textContent).toContain('Fixed expense updated.');
+    expect(html.textContent).toContain('Electric Bill Updated');
+  });
+
+  it('shows an update error when saving an edit fails', () => {
+    fixture.detectChanges();
+    apiStub.update.mockReturnValue(
+      throwError(() => new HttpErrorResponse({ status: 500, statusText: 'Server Error' })),
+    );
+
+    const component = fixture.componentInstance as unknown as {
+      startEdit(expense: {
+        id: string;
+        name: string;
+        amount: number;
+        isActive: boolean;
+        anchorDate: string;
+        recurrenceUnit: RecurrenceUnit;
+        recurrenceInterval: number;
+        skipUntilDate: string | null;
+        nextDueDate: string | null;
+        createdAtUtc: string;
+      }): void;
+      submitUpdate(expenseId: string): void;
+    };
+
+    component.startEdit({
+      id: 'existing-expense-id',
+      name: 'Electric Bill',
+      amount: 120,
+      isActive: true,
+      anchorDate: '2026-05-01',
+      recurrenceUnit: RecurrenceUnit.Month,
+      recurrenceInterval: 1,
+      skipUntilDate: null,
+      nextDueDate: '2026-06-01',
+      createdAtUtc: '2026-05-01T00:00:00Z',
+    });
+
+    component.submitUpdate('existing-expense-id');
+    fixture.detectChanges();
+
+    const html = fixture.nativeElement as HTMLElement;
+    expect(html.textContent).toContain('Unable to update this fixed expense right now.');
   });
 });

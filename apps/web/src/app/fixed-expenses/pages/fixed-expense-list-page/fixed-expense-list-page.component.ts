@@ -16,6 +16,7 @@ import {
   type CreateFixedExpenseRequest,
   type FixedExpenseResponse,
   RecurrenceUnit,
+  type UpdateFixedExpenseRequest,
 } from '../../models/fixed-expense.models';
 import { FixedExpenseApiService } from '../../services/fixed-expense-api.service';
 
@@ -50,10 +51,14 @@ export class FixedExpenseListPageComponent {
 
   protected readonly loading = signal(true);
   protected readonly saving = signal(false);
+  protected readonly updating = signal(false);
   protected readonly expenses = signal<FixedExpenseResponse[]>([]);
   protected readonly errorMessage = signal<string | null>(null);
   protected readonly createErrorMessage = signal<string | null>(null);
   protected readonly createSuccessMessage = signal<string | null>(null);
+  protected readonly editingExpenseId = signal<string | null>(null);
+  protected readonly updateErrorMessage = signal<string | null>(null);
+  protected readonly updateSuccessMessage = signal<string | null>(null);
 
   protected readonly recurrenceOptions: readonly RecurrenceOption[] = [
     { value: RecurrenceUnit.Day, label: 'Day(s)' },
@@ -70,6 +75,19 @@ export class FixedExpenseListPageComponent {
       Validators.required,
     ),
     recurrenceInterval: this.fb.control<number | null>(1, [Validators.required, Validators.min(1)]),
+    skipUntilDate: this.fb.control<Date | null>(null),
+    isActive: this.fb.control(true, Validators.required),
+  });
+
+  protected readonly editForm = this.fb.group({
+    name: this.fb.control('', [Validators.required, Validators.maxLength(200)]),
+    amount: this.fb.control<number | null>(null, [Validators.required, Validators.min(0.01)]),
+    anchorDate: this.fb.control<Date | null>(null, Validators.required),
+    recurrenceUnit: this.fb.control<RecurrenceUnit | null>(null, Validators.required),
+    recurrenceInterval: this.fb.control<number | null>(null, [
+      Validators.required,
+      Validators.min(1),
+    ]),
     skipUntilDate: this.fb.control<Date | null>(null),
     isActive: this.fb.control(true, Validators.required),
   });
@@ -142,6 +160,69 @@ export class FixedExpenseListPageComponent {
       });
   }
 
+  protected isEditing(expenseId: string): boolean {
+    return this.editingExpenseId() === expenseId;
+  }
+
+  protected startEdit(expense: FixedExpenseResponse): void {
+    this.editingExpenseId.set(expense.id);
+    this.updateErrorMessage.set(null);
+    this.updateSuccessMessage.set(null);
+    this.editForm.reset({
+      name: expense.name,
+      amount: expense.amount,
+      anchorDate: this.fromApiDate(expense.anchorDate),
+      recurrenceUnit: expense.recurrenceUnit,
+      recurrenceInterval: expense.recurrenceInterval,
+      skipUntilDate: expense.skipUntilDate ? this.fromApiDate(expense.skipUntilDate) : null,
+      isActive: expense.isActive,
+    });
+  }
+
+  protected cancelEdit(): void {
+    this.editingExpenseId.set(null);
+    this.updateErrorMessage.set(null);
+  }
+
+  protected submitUpdate(expenseId: string): void {
+    if (this.editForm.invalid) {
+      this.editForm.markAllAsTouched();
+      return;
+    }
+
+    const raw = this.editForm.getRawValue();
+    const payload: UpdateFixedExpenseRequest = {
+      name: raw.name!.trim(),
+      amount: raw.amount!,
+      anchorDate: this.toApiDate(raw.anchorDate!),
+      recurrenceUnit: raw.recurrenceUnit!,
+      recurrenceInterval: raw.recurrenceInterval!,
+      skipUntilDate: raw.skipUntilDate ? this.toApiDate(raw.skipUntilDate) : null,
+      isActive: raw.isActive!,
+    };
+
+    this.updating.set(true);
+    this.updateErrorMessage.set(null);
+    this.updateSuccessMessage.set(null);
+
+    this.fixedExpenseApi
+      .update(expenseId, payload)
+      .pipe(finalize(() => this.updating.set(false)))
+      .subscribe({
+        next: (updatedExpense) => {
+          this.expenses.update((current) =>
+            current.map((expense) => (expense.id === updatedExpense.id ? updatedExpense : expense)),
+          );
+          this.updateSuccessMessage.set('Fixed expense updated.');
+          this.editingExpenseId.set(null);
+        },
+        error: (error: HttpErrorResponse) => {
+          const fromService = this.fixedExpenseApi.errorMessage();
+          this.updateErrorMessage.set(fromService ?? this.extractUpdateApiError(error));
+        },
+      });
+  }
+
   private loadExpenses(): void {
     this.loading.set(true);
     this.errorMessage.set(null);
@@ -189,10 +270,23 @@ export class FixedExpenseListPageComponent {
     return 'Unable to add this fixed expense right now.';
   }
 
+  private extractUpdateApiError(error: HttpErrorResponse): string {
+    if (error.status === 0) {
+      return 'Cannot reach the API right now. Please check your connection and try again.';
+    }
+
+    return 'Unable to update this fixed expense right now.';
+  }
+
   private toApiDate(value: Date): string {
     const year = value.getFullYear();
     const month = `${value.getMonth() + 1}`.padStart(2, '0');
     const day = `${value.getDate()}`.padStart(2, '0');
     return `${year}-${month}-${day}`;
+  }
+
+  private fromApiDate(value: string): Date {
+    const [year, month, day] = value.split('-').map((part) => Number.parseInt(part, 10));
+    return new Date(year, month - 1, day);
   }
 }

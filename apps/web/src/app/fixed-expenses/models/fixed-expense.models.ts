@@ -14,6 +14,16 @@ export interface CreateFixedExpenseRequest {
   skipUntilDate: string | null;
 }
 
+export interface UpdateFixedExpenseRequest {
+  name: string;
+  amount: number;
+  anchorDate: string;
+  recurrenceUnit: RecurrenceUnit;
+  recurrenceInterval: number;
+  isActive: boolean;
+  skipUntilDate: string | null;
+}
+
 export interface FixedExpenseResponse {
   id: string;
   name: string;

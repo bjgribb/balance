@@ -5,6 +5,7 @@ import { environment } from '../../../environments/environment';
 import {
   type CreateFixedExpenseRequest,
   type FixedExpenseResponse,
+  type UpdateFixedExpenseRequest,
 } from '../models/fixed-expense.models';
 
 @Injectable({
@@ -36,6 +37,19 @@ export class FixedExpenseApiService {
       catchError((error: HttpErrorResponse) => {
         this.errorMessage.set(
           this.extractApiError(error, 'Unable to add this fixed expense right now.'),
+        );
+        return throwError(() => error);
+      }),
+    );
+  }
+
+  update(id: string, request: UpdateFixedExpenseRequest): Observable<FixedExpenseResponse> {
+    this.errorMessage.set(null);
+
+    return this.http.put<FixedExpenseResponse>(`${this.url}/${id}`, request).pipe(
+      catchError((error: HttpErrorResponse) => {
+        this.errorMessage.set(
+          this.extractApiError(error, 'Unable to update this fixed expense right now.'),
         );
         return throwError(() => error);
       }),

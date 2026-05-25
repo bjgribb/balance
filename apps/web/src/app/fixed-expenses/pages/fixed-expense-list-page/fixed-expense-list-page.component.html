@@ -174,6 +174,10 @@
                   </p>
                 </div>
 
+                <div class="expense-item__actions">
+                  <button mat-button type="button" (click)="startEdit(expense)">Edit</button>
+                </div>
+
                 <mat-chip class="expense-item__status" [highlighted]="expense.isActive">
                   {{ expense.isActive ? 'Active' : 'Paused' }}
                 </mat-chip>
@@ -198,10 +202,156 @@
                     </dd>
                   </div>
                 </dl>
+
+                @if (isEditing(expense.id)) {
+                  <form
+                    class="expense-item__edit-form"
+                    [formGroup]="editForm"
+                    (ngSubmit)="submitUpdate(expense.id)"
+                    novalidate
+                  >
+                    <mat-form-field class="expense-item__field" appearance="outline">
+                      <mat-label>Expense name</mat-label>
+                      <input matInput formControlName="name" maxlength="200" />
+                      @if (
+                        editForm.controls.name.touched &&
+                        editForm.controls.name.hasError('required')
+                      ) {
+                        <mat-error>Name is required.</mat-error>
+                      }
+                      @if (
+                        editForm.controls.name.touched &&
+                        editForm.controls.name.hasError('maxlength')
+                      ) {
+                        <mat-error>Name must be 200 characters or fewer.</mat-error>
+                      }
+                    </mat-form-field>
+
+                    <div class="expense-item__row">
+                      <mat-form-field class="expense-item__field" appearance="outline">
+                        <mat-label>Amount</mat-label>
+                        <input
+                          matInput
+                          type="number"
+                          inputmode="decimal"
+                          min="0.01"
+                          step="0.01"
+                          formControlName="amount"
+                        />
+                        <span matTextPrefix>$&nbsp;</span>
+                        @if (
+                          editForm.controls.amount.touched &&
+                          editForm.controls.amount.hasError('required')
+                        ) {
+                          <mat-error>Amount is required.</mat-error>
+                        }
+                        @if (
+                          editForm.controls.amount.touched &&
+                          editForm.controls.amount.hasError('min')
+                        ) {
+                          <mat-error>Amount must be greater than $0.00.</mat-error>
+                        }
+                      </mat-form-field>
+
+                      <mat-form-field class="expense-item__field" appearance="outline">
+                        <mat-label>Anchor date</mat-label>
+                        <input
+                          matInput
+                          [matDatepicker]="editAnchorDatePicker"
+                          formControlName="anchorDate"
+                        />
+                        <mat-datepicker-toggle matIconSuffix [for]="editAnchorDatePicker" />
+                        <mat-datepicker #editAnchorDatePicker />
+                        @if (
+                          editForm.controls.anchorDate.touched &&
+                          editForm.controls.anchorDate.hasError('required')
+                        ) {
+                          <mat-error>Anchor date is required.</mat-error>
+                        }
+                      </mat-form-field>
+                    </div>
+
+                    <div class="expense-item__row">
+                      <mat-form-field class="expense-item__field" appearance="outline">
+                        <mat-label>Recurrence unit</mat-label>
+                        <mat-select formControlName="recurrenceUnit">
+                          @for (option of recurrenceOptions; track option.value) {
+                            <mat-option [value]="option.value">{{ option.label }}</mat-option>
+                          }
+                        </mat-select>
+                        @if (
+                          editForm.controls.recurrenceUnit.touched &&
+                          editForm.controls.recurrenceUnit.hasError('required')
+                        ) {
+                          <mat-error>Recurrence unit is required.</mat-error>
+                        }
+                      </mat-form-field>
+
+                      <mat-form-field class="expense-item__field" appearance="outline">
+                        <mat-label>Every # units</mat-label>
+                        <input
+                          matInput
+                          type="number"
+                          inputmode="numeric"
+                          min="1"
+                          step="1"
+                          formControlName="recurrenceInterval"
+                        />
+                        @if (
+                          editForm.controls.recurrenceInterval.touched &&
+                          editForm.controls.recurrenceInterval.hasError('required')
+                        ) {
+                          <mat-error>Recurrence interval is required.</mat-error>
+                        }
+                        @if (
+                          editForm.controls.recurrenceInterval.touched &&
+                          editForm.controls.recurrenceInterval.hasError('min')
+                        ) {
+                          <mat-error>Recurrence interval must be at least 1.</mat-error>
+                        }
+                      </mat-form-field>
+                    </div>
+
+                    <mat-form-field class="expense-item__field" appearance="outline">
+                      <mat-label>Skip until date (optional)</mat-label>
+                      <input
+                        matInput
+                        [matDatepicker]="editSkipUntilDatePicker"
+                        formControlName="skipUntilDate"
+                      />
+                      <mat-datepicker-toggle matIconSuffix [for]="editSkipUntilDatePicker" />
+                      <mat-datepicker #editSkipUntilDatePicker />
+                    </mat-form-field>
+
+                    <mat-checkbox formControlName="isActive">Expense is active</mat-checkbox>
+
+                    @if (updateErrorMessage()) {
+                      <p class="expense-item__feedback expense-item__feedback--error" role="alert">
+                        {{ updateErrorMessage() }}
+                      </p>
+                    }
+
+                    <div class="expense-item__edit-actions">
+                      <button mat-button type="button" (click)="cancelEdit()">Cancel</button>
+                      <button mat-flat-button type="submit" [disabled]="updating()">
+                        {{ updating() ? 'Saving...' : 'Save changes' }}
+                      </button>
+                    </div>
+                  </form>
+                }
               </article>
             </li>
           }
         </ul>
+      }
+
+      @if (updateSuccessMessage()) {
+        <p
+          class="fixed-expenses-card__feedback fixed-expenses-card__feedback--success"
+          aria-live="polite"
+        >
+          {{ updateSuccessMessage() }}
+        </p>
       }
     </mat-card-content>
   </mat-card>
