@@ -1,6 +1,7 @@
 <section class="dashboard-layout">
   <div class="dashboard-grid">
     <app-current-pay-period-card
+      class="dashboard-grid__pay-period"
       [loading]="loading()"
       [loadError]="loadError()"
       [hasPaySchedule]="hasPaySchedule()"
@@ -8,6 +9,17 @@
       [periodEnd]="periodEnd()"
       [daysRemaining]="daysRemaining()"
       [progressPercent]="progressPercent()"
+    />
+
+    <app-fixed-expense-summary-card
+      class="dashboard-grid__fixed-expenses"
+      [loading]="fixedExpensesLoading()"
+      [loadError]="fixedExpensesLoadError()"
+      [hasPaySchedule]="hasPaySchedule()"
+      [totalDueThisPeriod]="totalFixedExpensesDueThisPeriod()"
+      [dueCountThisPeriod]="fixedExpenseCountThisPeriod()"
+      [pendingThisPeriod]="pendingFixedExpensesThisPeriod()"
+      [paidThisPeriod]="paidFixedExpensesThisPeriod()"
     />
   </div>
 </section>

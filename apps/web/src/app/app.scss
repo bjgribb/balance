@@ -4,7 +4,7 @@
   display: flex;
   width: 100%;
 
-  --app-content-padding-inline: 1rem;
+  --app-content-padding-inline: clamp(0.75rem, 3vw, 2rem);
   --app-content-padding-top: 1rem;
   --app-mobile-nav-clearance: calc(4.75rem + env(safe-area-inset-bottom));
   --app-content-padding-bottom: calc(var(--app-mobile-nav-clearance) + 1rem);
@@ -217,7 +217,7 @@
 
 @media (min-width: 960px) {
   :host {
-    --app-content-padding-inline: 1.25rem;
+    --app-content-padding-inline: clamp(1.25rem, 4vw, 5rem);
     --app-content-padding-top: 1.5rem;
     --app-content-padding-bottom: 1.5rem;
   }

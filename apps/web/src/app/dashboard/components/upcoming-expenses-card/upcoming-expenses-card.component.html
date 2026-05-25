@@ -1,0 +1,46 @@
+<mat-card class="upcoming-expenses-card" appearance="outlined">
+  <mat-card-header class="upcoming-expenses-card__header">
+    <div class="upcoming-expenses-card__heading">
+      <mat-card-title class="upcoming-expenses-card__title">Upcoming Expenses</mat-card-title>
+      @if (periodStart() && periodEnd()) {
+        <p class="upcoming-expenses-card__range">
+          {{ periodStart() | date: 'MMM d' }} - {{ periodEnd() | date: 'MMM d' }}
+        </p>
+      }
+    </div>
+  </mat-card-header>
+
+  <mat-card-content>
+    @if (loading()) {
+      <div class="upcoming-expenses-card__state" aria-live="polite">
+        <p>Loading upcoming expenses...</p>
+      </div>
+    } @else if (loadError()) {
+      <div class="upcoming-expenses-card__state upcoming-expenses-card__state--error">
+        <p>Could not load upcoming expenses.</p>
+      </div>
+    } @else if (!hasPaySchedule()) {
+      <div class="upcoming-expenses-card__state">
+        <p>Add your pay schedule to see upcoming bills for the next period.</p>
+      </div>
+    } @else if (expenses().length === 0) {
+      <div class="upcoming-expenses-card__state">
+        <p>No fixed expenses due in the next pay period.</p>
+      </div>
+    } @else {
+      <ul class="upcoming-expenses-list" aria-label="Upcoming expenses">
+        @for (expense of expenses(); track trackById($index, expense)) {
+          <li class="upcoming-expenses-list__item">
+            <div class="upcoming-expenses-list__main">
+              <p class="upcoming-expenses-list__name">{{ expense.name }}</p>
+              <p class="upcoming-expenses-list__date">{{ expense.dueDate | date: 'MMM d' }}</p>
+            </div>
+            <p class="upcoming-expenses-list__amount">
+              {{ expense.amount | currency: 'USD' : 'symbol' : '1.2-2' }}
+            </p>
+          </li>
+        }
+      </ul>
+    }
+  </mat-card-content>
+</mat-card>

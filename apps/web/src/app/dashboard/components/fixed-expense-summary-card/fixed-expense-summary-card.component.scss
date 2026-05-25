@@ -1,0 +1,132 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+.fixed-expense-summary-card {
+  border-radius: 20px;
+  background: color-mix(in srgb, var(--mat-sys-surface) 92%, transparent);
+  padding: 1rem;
+}
+
+.fixed-expense-summary-card__header {
+  padding-bottom: 0.75rem;
+}
+
+.fixed-expense-summary-card__title {
+  font-size: 1.1rem;
+  line-height: 1.2;
+}
+
+.fixed-expense-summary-card__state {
+  min-height: 86px;
+  display: flex;
+  align-items: center;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.fixed-expense-summary-card__state p {
+  margin: 0;
+}
+
+.fixed-expense-summary-card__state--error {
+  color: var(--mat-sys-error);
+}
+
+.fixed-expense-summary-card__details {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.fixed-expense-summary-card__total,
+.fixed-expense-summary-card__count {
+  margin: 0;
+}
+
+.fixed-expense-summary-card__total {
+  font: var(--mat-sys-headline-small);
+  line-height: 1.1;
+}
+
+.fixed-expense-summary-card__count {
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.fixed-expense-summary-card__upcoming {
+  margin-top: 0.25rem;
+  border-top: 1px solid color-mix(in srgb, var(--mat-sys-outline-variant) 42%, transparent);
+  padding-top: 0.7rem;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.fixed-expense-summary-card__lists {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.fixed-expense-summary-card__upcoming-title,
+.fixed-expense-summary-card__upcoming-empty {
+  margin: 0;
+}
+
+.fixed-expense-summary-card__upcoming-title {
+  font: var(--mat-sys-title-small);
+}
+
+.fixed-expense-summary-card__upcoming-empty {
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.fixed-expense-summary-card__upcoming-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.fixed-expense-summary-card__upcoming-item {
+  border: 1px solid color-mix(in srgb, var(--mat-sys-outline-variant) 45%, transparent);
+  border-radius: 14px;
+  padding: 0.7rem;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.fixed-expense-summary-card__upcoming-main {
+  min-width: 0;
+}
+
+.fixed-expense-summary-card__upcoming-name,
+.fixed-expense-summary-card__upcoming-date,
+.fixed-expense-summary-card__upcoming-amount {
+  margin: 0;
+}
+
+.fixed-expense-summary-card__upcoming-name {
+  font: var(--mat-sys-title-small);
+}
+
+.fixed-expense-summary-card__upcoming-date {
+  margin-top: 0.08rem;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.fixed-expense-summary-card__upcoming-amount {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+@media (min-width: 900px) {
+  .fixed-expense-summary-card__lists {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+  }
+
+  .fixed-expense-summary-card__upcoming {
+    margin-top: 0.35rem;
+  }
+}

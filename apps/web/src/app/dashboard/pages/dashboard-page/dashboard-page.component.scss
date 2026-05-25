@@ -1,19 +1,30 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
 .dashboard-layout {
   width: 100%;
-  display: flex;
-  justify-content: center;
-  box-sizing: border-box;
-  padding-bottom: calc(var(--app-mobile-nav-clearance, 0px) + 1rem);
 }
 
 .dashboard-grid {
-  width: min(760px, 100%);
+  width: 100%;
   display: grid;
   gap: 0.75rem;
 }
 
 @media (min-width: 960px) {
-  .dashboard-layout {
-    padding-bottom: 1.5rem;
+  .dashboard-grid {
+    grid-template-columns: minmax(220px, 300px) minmax(0, 1fr);
+    gap: 0.9rem;
+    align-items: start;
+  }
+
+  .dashboard-grid__pay-period {
+    grid-column: 1;
+  }
+
+  .dashboard-grid__fixed-expenses {
+    grid-column: 2;
   }
 }

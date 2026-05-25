@@ -2,15 +2,31 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { finalize } from 'rxjs';
 import {
+  FixedExpenseResponse,
+  RecurrenceUnit,
+} from '../../../fixed-expenses/models/fixed-expense.models';
+import { FixedExpenseApiService } from '../../../fixed-expenses/services/fixed-expense-api.service';
+import {
   PayFrequency,
   PayScheduleResponse,
 } from '../../../pay-schedule/models/pay-schedule.models';
 import { PayScheduleApiService } from '../../../pay-schedule/services/pay-schedule-api.service';
 import { CurrentPayPeriodCardComponent } from '../../components/current-pay-period-card/current-pay-period-card.component';
+import {
+  FixedExpenseSummaryCardComponent,
+  PayPeriodUpcomingExpenseItem,
+} from '../../components/fixed-expense-summary-card/fixed-expense-summary-card.component';
+
+interface FixedExpenseOccurrence {
+  readonly id: string;
+  readonly name: string;
+  readonly amount: number;
+  readonly dueDate: Date;
+}
 
 @Component({
   selector: 'app-dashboard-page',
-  imports: [CurrentPayPeriodCardComponent],
+  imports: [CurrentPayPeriodCardComponent, FixedExpenseSummaryCardComponent],
   templateUrl: './dashboard-page.component.html',
   styleUrl: './dashboard-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -19,10 +35,14 @@ export class DashboardPageComponent {
   private static readonly DAY_IN_MS = 24 * 60 * 60 * 1000;
 
   private readonly payScheduleApi = inject(PayScheduleApiService);
+  private readonly fixedExpenseApi = inject(FixedExpenseApiService);
 
   protected readonly loading = signal(true);
   protected readonly loadError = signal(false);
   protected readonly paySchedule = signal<PayScheduleResponse | null>(null);
+  protected readonly fixedExpensesLoading = signal(true);
+  protected readonly fixedExpensesLoadError = signal(false);
+  protected readonly fixedExpenses = signal<FixedExpenseResponse[]>([]);
 
   protected readonly hasPaySchedule = computed(() => this.paySchedule() !== null);
   protected readonly currentPeriod = computed(() => {
@@ -57,9 +77,77 @@ export class DashboardPageComponent {
 
     return (elapsedDays / totalDays) * 100;
   });
+  protected readonly dueFixedExpensesThisPeriod = computed<readonly FixedExpenseOccurrence[]>(
+    () => {
+      const period = this.currentPeriod();
+      if (!period) {
+        return [];
+      }
+
+      const start = period.start;
+      const end = period.end;
+
+      return this.fixedExpenses().flatMap((expense) => {
+        if (!expense.isActive) {
+          return [];
+        }
+
+        const dueDate = this.resolveOccurrenceInRange(expense, start, end);
+        if (!dueDate) {
+          return [];
+        }
+
+        return [
+          {
+            id: expense.id,
+            name: expense.name,
+            amount: expense.amount,
+            dueDate,
+          },
+        ];
+      });
+    },
+  );
+  protected readonly totalFixedExpensesDueThisPeriod = computed(() =>
+    this.dueFixedExpensesThisPeriod().reduce((sum, expense) => sum + expense.amount, 0),
+  );
+  protected readonly fixedExpenseCountThisPeriod = computed(
+    () => this.dueFixedExpensesThisPeriod().length,
+  );
+  protected readonly pendingFixedExpensesThisPeriod = computed<
+    readonly PayPeriodUpcomingExpenseItem[]
+  >(() => {
+    const today = this.todayDate();
+
+    return this.dueFixedExpensesThisPeriod()
+      .filter((expense) => this.compareDates(expense.dueDate, today) >= 0)
+      .sort((left, right) => this.compareDates(left.dueDate, right.dueDate))
+      .map((expense) => ({
+        id: expense.id,
+        name: expense.name,
+        dueDateLabel: this.formatMonthDay(expense.dueDate),
+        amount: expense.amount,
+      }));
+  });
+  protected readonly paidFixedExpensesThisPeriod = computed<
+    readonly PayPeriodUpcomingExpenseItem[]
+  >(() => {
+    const today = this.todayDate();
+
+    return this.dueFixedExpensesThisPeriod()
+      .filter((expense) => this.compareDates(expense.dueDate, today) < 0)
+      .sort((left, right) => this.compareDates(left.dueDate, right.dueDate))
+      .map((expense) => ({
+        id: expense.id,
+        name: expense.name,
+        dueDateLabel: this.formatMonthDay(expense.dueDate),
+        amount: expense.amount,
+      }));
+  });
 
   constructor() {
     this.loadPaySchedule();
+    this.loadFixedExpenses();
   }
 
   private loadPaySchedule(): void {
@@ -80,6 +168,23 @@ export class DashboardPageComponent {
           }
 
           this.loadError.set(true);
+        },
+      });
+  }
+
+  private loadFixedExpenses(): void {
+    this.fixedExpensesLoading.set(true);
+    this.fixedExpensesLoadError.set(false);
+
+    this.fixedExpenseApi
+      .getAll()
+      .pipe(finalize(() => this.fixedExpensesLoading.set(false)))
+      .subscribe({
+        next: (expenses) => {
+          this.fixedExpenses.set(expenses);
+        },
+        error: () => {
+          this.fixedExpensesLoadError.set(true);
         },
       });
   }
@@ -163,6 +268,57 @@ export class DashboardPageComponent {
 
   private compareDates(a: Date, b: Date): number {
     return a.getTime() - b.getTime();
+  }
+
+  private resolveOccurrenceInRange(
+    expense: FixedExpenseResponse,
+    start: Date,
+    end: Date,
+  ): Date | null {
+    if (!expense.nextDueDate) {
+      return null;
+    }
+
+    let candidate = this.parseApiDate(expense.nextDueDate);
+    const maxIterations = 240;
+    let iterations = 0;
+
+    while (this.compareDates(candidate, end) >= 0 && iterations < maxIterations) {
+      candidate = this.shiftExpenseDate(candidate, expense, -1);
+      iterations += 1;
+    }
+
+    if (this.compareDates(candidate, start) < 0 || this.compareDates(candidate, end) >= 0) {
+      return null;
+    }
+
+    if (expense.skipUntilDate) {
+      const skipUntil = this.parseApiDate(expense.skipUntilDate);
+      if (this.compareDates(candidate, skipUntil) < 0) {
+        return null;
+      }
+    }
+
+    return candidate;
+  }
+
+  private shiftExpenseDate(date: Date, expense: FixedExpenseResponse, direction: 1 | -1): Date {
+    const step = Math.max(1, expense.recurrenceInterval) * direction;
+
+    switch (expense.recurrenceUnit) {
+      case RecurrenceUnit.Day:
+        return this.addDays(date, step);
+      case RecurrenceUnit.Week:
+        return this.addDays(date, step * 7);
+      case RecurrenceUnit.Month:
+        return this.addMonths(date, step);
+      default:
+        return date;
+    }
+  }
+
+  private formatMonthDay(value: Date): string {
+    return value.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   }
 
   private daysBetween(start: Date, end: Date): number {

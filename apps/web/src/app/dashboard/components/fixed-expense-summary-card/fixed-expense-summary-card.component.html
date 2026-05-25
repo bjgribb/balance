@@ -1,0 +1,96 @@
+<mat-card class="fixed-expense-summary-card" appearance="outlined">
+  <mat-card-header class="fixed-expense-summary-card__header">
+    <mat-card-title class="fixed-expense-summary-card__title">Fixed Expense Summary</mat-card-title>
+  </mat-card-header>
+
+  <mat-card-content>
+    @if (loading()) {
+      <div class="fixed-expense-summary-card__state" aria-live="polite">
+        <p>Loading fixed expense summary...</p>
+      </div>
+    } @else if (loadError()) {
+      <div class="fixed-expense-summary-card__state fixed-expense-summary-card__state--error">
+        <p>Could not load fixed expense summary.</p>
+      </div>
+    } @else if (!hasPaySchedule()) {
+      <div class="fixed-expense-summary-card__state">
+        <p>Add your pay schedule to see expenses due this period.</p>
+      </div>
+    } @else {
+      <div class="fixed-expense-summary-card__details">
+        <p class="fixed-expense-summary-card__total">
+          {{ totalDueThisPeriod() | currency: 'USD' : 'symbol' : '1.2-2' }}
+        </p>
+        <p class="fixed-expense-summary-card__count">
+          @if (dueCountThisPeriod() === 0) {
+            No expenses due this period
+          } @else if (dueCountThisPeriod() === 1) {
+            1 expense due this period
+          } @else {
+            {{ dueCountThisPeriod() }} expenses due this period
+          }
+        </p>
+
+        <div class="fixed-expense-summary-card__lists">
+          <section class="fixed-expense-summary-card__upcoming">
+            <p class="fixed-expense-summary-card__upcoming-title">Pending this pay period</p>
+
+            @if (pendingThisPeriod().length === 0) {
+              <p class="fixed-expense-summary-card__upcoming-empty">
+                No pending fixed expenses for this pay period.
+              </p>
+            } @else {
+              <ul
+                class="fixed-expense-summary-card__upcoming-list"
+                aria-label="Pending fixed expenses"
+              >
+                @for (expense of pendingThisPeriod(); track trackById($index, expense)) {
+                  <li class="fixed-expense-summary-card__upcoming-item">
+                    <div class="fixed-expense-summary-card__upcoming-main">
+                      <p class="fixed-expense-summary-card__upcoming-name">{{ expense.name }}</p>
+                      <p class="fixed-expense-summary-card__upcoming-date">
+                        {{ expense.dueDateLabel }}
+                      </p>
+                    </div>
+                    <p class="fixed-expense-summary-card__upcoming-amount">
+                      {{ expense.amount | currency: 'USD' : 'symbol' : '1.2-2' }}
+                    </p>
+                  </li>
+                }
+              </ul>
+            }
+          </section>
+
+          <section class="fixed-expense-summary-card__upcoming">
+            <p class="fixed-expense-summary-card__upcoming-title">Paid this pay period</p>
+
+            @if (paidThisPeriod().length === 0) {
+              <p class="fixed-expense-summary-card__upcoming-empty">
+                No paid fixed expenses yet this pay period.
+              </p>
+            } @else {
+              <ul
+                class="fixed-expense-summary-card__upcoming-list"
+                aria-label="Paid fixed expenses"
+              >
+                @for (expense of paidThisPeriod(); track trackById($index, expense)) {
+                  <li class="fixed-expense-summary-card__upcoming-item">
+                    <div class="fixed-expense-summary-card__upcoming-main">
+                      <p class="fixed-expense-summary-card__upcoming-name">{{ expense.name }}</p>
+                      <p class="fixed-expense-summary-card__upcoming-date">
+                        {{ expense.dueDateLabel }}
+                      </p>
+                    </div>
+                    <p class="fixed-expense-summary-card__upcoming-amount">
+                      {{ expense.amount | currency: 'USD' : 'symbol' : '1.2-2' }}
+                    </p>
+                  </li>
+                }
+              </ul>
+            }
+          </section>
+        </div>
+      </div>
+    }
+  </mat-card-content>
+</mat-card>

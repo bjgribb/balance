@@ -5,14 +5,10 @@
 
 .fixed-expenses-layout {
   width: 100%;
-  display: flex;
-  justify-content: center;
-  box-sizing: border-box;
-  padding-bottom: calc(var(--app-mobile-nav-clearance, 0px) + 1rem);
 }
 
 .fixed-expenses-card {
-  width: min(760px, 100%);
+  width: 100%;
   border-radius: 20px;
   background: color-mix(in srgb, var(--mat-sys-surface) 92%, transparent);
   padding: 1rem;
@@ -204,11 +200,5 @@
     justify-content: space-between;
     align-items: baseline;
     gap: 1rem;
-  }
-}
-
-@media (min-width: 960px) {
-  .fixed-expenses-layout {
-    padding-bottom: 1.5rem;
   }
 }
