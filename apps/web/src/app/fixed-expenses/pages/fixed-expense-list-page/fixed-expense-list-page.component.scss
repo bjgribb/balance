@@ -153,6 +153,11 @@
 .expense-item__actions {
   display: flex;
   justify-content: flex-end;
+  gap: 0.35rem;
+}
+
+.expense-item__delete {
+  color: var(--mat-sys-error);
 }
 
 .expense-item__details {
@@ -219,6 +224,10 @@
 
 .fixed-expenses-card__feedback--success {
   color: color-mix(in srgb, var(--mat-sys-tertiary) 70%, var(--mat-sys-on-surface));
+}
+
+.fixed-expenses-card__feedback--error {
+  color: var(--mat-sys-error);
 }
 
 @media (min-width: 700px) {

@@ -54,6 +54,7 @@ class FixedExpenseApiServiceStub {
       createdAtUtc: '2026-05-01T00:00:00Z',
     }),
   );
+  readonly delete = vi.fn().mockReturnValue(of(void 0));
 }
 
 describe('FixedExpenseListPageComponent', () => {
@@ -72,6 +73,10 @@ describe('FixedExpenseListPageComponent', () => {
     }).compileComponents();
 
     fixture = TestBed.createComponent(FixedExpenseListPageComponent);
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
   it('shows an empty state when no fixed expenses exist', () => {
@@ -287,5 +292,123 @@ describe('FixedExpenseListPageComponent', () => {
 
     const html = fixture.nativeElement as HTMLElement;
     expect(html.textContent).toContain('Unable to update this fixed expense right now.');
+  });
+
+  it('removes an expense when delete is confirmed', () => {
+    fixture.detectChanges();
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+
+    const component = fixture.componentInstance as unknown as {
+      deleteExpense(expense: {
+        id: string;
+        name: string;
+        amount: number;
+        isActive: boolean;
+        anchorDate: string;
+        recurrenceUnit: RecurrenceUnit;
+        recurrenceInterval: number;
+        skipUntilDate: string | null;
+        nextDueDate: string | null;
+        createdAtUtc: string;
+      }): void;
+    };
+
+    component.deleteExpense({
+      id: 'existing-expense-id',
+      name: 'Electric Bill',
+      amount: 120,
+      isActive: true,
+      anchorDate: '2026-05-01',
+      recurrenceUnit: RecurrenceUnit.Month,
+      recurrenceInterval: 1,
+      skipUntilDate: null,
+      nextDueDate: '2026-06-01',
+      createdAtUtc: '2026-05-01T00:00:00Z',
+    });
+
+    fixture.detectChanges();
+
+    expect(apiStub.delete).toHaveBeenCalledWith('existing-expense-id');
+
+    const html = fixture.nativeElement as HTMLElement;
+    expect(html.textContent).toContain('Fixed expense removed.');
+    expect(html.textContent).not.toContain('Electric Bill');
+  });
+
+  it('does not call delete when confirmation is canceled', () => {
+    fixture.detectChanges();
+    vi.spyOn(window, 'confirm').mockReturnValue(false);
+
+    const component = fixture.componentInstance as unknown as {
+      deleteExpense(expense: {
+        id: string;
+        name: string;
+        amount: number;
+        isActive: boolean;
+        anchorDate: string;
+        recurrenceUnit: RecurrenceUnit;
+        recurrenceInterval: number;
+        skipUntilDate: string | null;
+        nextDueDate: string | null;
+        createdAtUtc: string;
+      }): void;
+    };
+
+    component.deleteExpense({
+      id: 'existing-expense-id',
+      name: 'Electric Bill',
+      amount: 120,
+      isActive: true,
+      anchorDate: '2026-05-01',
+      recurrenceUnit: RecurrenceUnit.Month,
+      recurrenceInterval: 1,
+      skipUntilDate: null,
+      nextDueDate: '2026-06-01',
+      createdAtUtc: '2026-05-01T00:00:00Z',
+    });
+
+    expect(apiStub.delete).not.toHaveBeenCalled();
+  });
+
+  it('shows a delete error when removing an expense fails', () => {
+    fixture.detectChanges();
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+    apiStub.delete.mockReturnValue(
+      throwError(() => new HttpErrorResponse({ status: 500, statusText: 'Server Error' })),
+    );
+
+    const component = fixture.componentInstance as unknown as {
+      deleteExpense(expense: {
+        id: string;
+        name: string;
+        amount: number;
+        isActive: boolean;
+        anchorDate: string;
+        recurrenceUnit: RecurrenceUnit;
+        recurrenceInterval: number;
+        skipUntilDate: string | null;
+        nextDueDate: string | null;
+        createdAtUtc: string;
+      }): void;
+    };
+
+    component.deleteExpense({
+      id: 'existing-expense-id',
+      name: 'Electric Bill',
+      amount: 120,
+      isActive: true,
+      anchorDate: '2026-05-01',
+      recurrenceUnit: RecurrenceUnit.Month,
+      recurrenceInterval: 1,
+      skipUntilDate: null,
+      nextDueDate: '2026-06-01',
+      createdAtUtc: '2026-05-01T00:00:00Z',
+    });
+
+    fixture.detectChanges();
+
+    const html = fixture.nativeElement as HTMLElement;
+    expect(html.textContent).toContain('Unable to remove this fixed expense right now.');
+    expect(html.textContent).toContain('Electric Bill');
   });
 });

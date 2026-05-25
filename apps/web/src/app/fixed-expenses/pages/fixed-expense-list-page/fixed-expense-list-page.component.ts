@@ -52,6 +52,7 @@ export class FixedExpenseListPageComponent {
   protected readonly loading = signal(true);
   protected readonly saving = signal(false);
   protected readonly updating = signal(false);
+  protected readonly deletingExpenseId = signal<string | null>(null);
   protected readonly expenses = signal<FixedExpenseResponse[]>([]);
   protected readonly errorMessage = signal<string | null>(null);
   protected readonly createErrorMessage = signal<string | null>(null);
@@ -59,6 +60,8 @@ export class FixedExpenseListPageComponent {
   protected readonly editingExpenseId = signal<string | null>(null);
   protected readonly updateErrorMessage = signal<string | null>(null);
   protected readonly updateSuccessMessage = signal<string | null>(null);
+  protected readonly deleteErrorMessage = signal<string | null>(null);
+  protected readonly deleteSuccessMessage = signal<string | null>(null);
 
   protected readonly recurrenceOptions: readonly RecurrenceOption[] = [
     { value: RecurrenceUnit.Day, label: 'Day(s)' },
@@ -135,6 +138,7 @@ export class FixedExpenseListPageComponent {
     this.saving.set(true);
     this.createErrorMessage.set(null);
     this.createSuccessMessage.set(null);
+    this.deleteSuccessMessage.set(null);
 
     this.fixedExpenseApi
       .create(payload)
@@ -168,6 +172,7 @@ export class FixedExpenseListPageComponent {
     this.editingExpenseId.set(expense.id);
     this.updateErrorMessage.set(null);
     this.updateSuccessMessage.set(null);
+    this.deleteSuccessMessage.set(null);
     this.editForm.reset({
       name: expense.name,
       amount: expense.amount,
@@ -204,6 +209,7 @@ export class FixedExpenseListPageComponent {
     this.updating.set(true);
     this.updateErrorMessage.set(null);
     this.updateSuccessMessage.set(null);
+    this.deleteSuccessMessage.set(null);
 
     this.fixedExpenseApi
       .update(expenseId, payload)
@@ -219,6 +225,39 @@ export class FixedExpenseListPageComponent {
         error: (error: HttpErrorResponse) => {
           const fromService = this.fixedExpenseApi.errorMessage();
           this.updateErrorMessage.set(fromService ?? this.extractUpdateApiError(error));
+        },
+      });
+  }
+
+  protected isDeleting(expenseId: string): boolean {
+    return this.deletingExpenseId() === expenseId;
+  }
+
+  protected deleteExpense(expense: FixedExpenseResponse): void {
+    const confirmed = this.confirmDelete(expense.name);
+    if (!confirmed) {
+      return;
+    }
+
+    this.deletingExpenseId.set(expense.id);
+    this.deleteErrorMessage.set(null);
+    this.deleteSuccessMessage.set(null);
+
+    this.fixedExpenseApi
+      .delete(expense.id)
+      .pipe(finalize(() => this.deletingExpenseId.set(null)))
+      .subscribe({
+        next: () => {
+          this.expenses.update((current) => current.filter((item) => item.id !== expense.id));
+          if (this.editingExpenseId() === expense.id) {
+            this.editingExpenseId.set(null);
+          }
+
+          this.deleteSuccessMessage.set('Fixed expense removed.');
+        },
+        error: (error: HttpErrorResponse) => {
+          const fromService = this.fixedExpenseApi.errorMessage();
+          this.deleteErrorMessage.set(fromService ?? this.extractDeleteApiError(error));
         },
       });
   }
@@ -276,6 +315,18 @@ export class FixedExpenseListPageComponent {
     }
 
     return 'Unable to update this fixed expense right now.';
+  }
+
+  private extractDeleteApiError(error: HttpErrorResponse): string {
+    if (error.status === 0) {
+      return 'Cannot reach the API right now. Please check your connection and try again.';
+    }
+
+    return 'Unable to remove this fixed expense right now.';
+  }
+
+  private confirmDelete(name: string): boolean {
+    return window.confirm(`Delete fixed expense "${name}"?`);
   }
 
   private toApiDate(value: Date): string {

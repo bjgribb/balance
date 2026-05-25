@@ -56,6 +56,19 @@ export class FixedExpenseApiService {
     );
   }
 
+  delete(id: string): Observable<void> {
+    this.errorMessage.set(null);
+
+    return this.http.delete<void>(`${this.url}/${id}`).pipe(
+      catchError((error: HttpErrorResponse) => {
+        this.errorMessage.set(
+          this.extractApiError(error, 'Unable to remove this fixed expense right now.'),
+        );
+        return throwError(() => error);
+      }),
+    );
+  }
+
   private extractApiError(error: HttpErrorResponse, fallback: string): string {
     const payload = error.error;
     if (

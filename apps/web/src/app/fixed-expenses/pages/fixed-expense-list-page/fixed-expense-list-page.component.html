@@ -176,6 +176,15 @@
 
                 <div class="expense-item__actions">
                   <button mat-button type="button" (click)="startEdit(expense)">Edit</button>
+                  <button
+                    mat-button
+                    type="button"
+                    class="expense-item__delete"
+                    [disabled]="isDeleting(expense.id)"
+                    (click)="deleteExpense(expense)"
+                  >
+                    {{ isDeleting(expense.id) ? 'Removing...' : 'Remove' }}
+                  </button>
                 </div>
 
                 <mat-chip class="expense-item__status" [highlighted]="expense.isActive">
@@ -351,6 +360,21 @@
           aria-live="polite"
         >
           {{ updateSuccessMessage() }}
+        </p>
+      }
+
+      @if (deleteErrorMessage()) {
+        <p class="fixed-expenses-card__feedback fixed-expenses-card__feedback--error" role="alert">
+          {{ deleteErrorMessage() }}
+        </p>
+      }
+
+      @if (deleteSuccessMessage()) {
+        <p
+          class="fixed-expenses-card__feedback fixed-expenses-card__feedback--success"
+          aria-live="polite"
+        >
+          {{ deleteSuccessMessage() }}
         </p>
       }
     </mat-card-content>
