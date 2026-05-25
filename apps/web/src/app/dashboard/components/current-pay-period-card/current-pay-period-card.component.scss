@@ -1,0 +1,67 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+.current-pay-period-card {
+  border-radius: 20px;
+  background: color-mix(in srgb, var(--mat-sys-surface) 92%, transparent);
+  padding: 1rem;
+}
+
+.current-pay-period-card__header {
+  padding-bottom: 0.75rem;
+}
+
+.current-pay-period-card__title {
+  font-size: 1.1rem;
+  line-height: 1.2;
+}
+
+.current-pay-period-card__state {
+  min-height: 86px;
+  display: flex;
+  align-items: center;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.current-pay-period-card__state p {
+  margin: 0;
+}
+
+.current-pay-period-card__state--error {
+  color: var(--mat-sys-error);
+}
+
+.current-pay-period-card__details {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.current-pay-period-card__range,
+.current-pay-period-card__remaining {
+  margin: 0;
+}
+
+.current-pay-period-card__range {
+  font: var(--mat-sys-title-medium);
+}
+
+.current-pay-period-card__remaining {
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.current-pay-period-card__progress {
+  width: 100%;
+  height: 0.5rem;
+  border-radius: 999px;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--mat-sys-outline-variant) 45%, transparent);
+}
+
+.current-pay-period-card__progress-fill {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--mat-sys-primary), var(--mat-sys-tertiary));
+}

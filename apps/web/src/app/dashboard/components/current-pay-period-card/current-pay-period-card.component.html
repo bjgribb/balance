@@ -1,0 +1,42 @@
+<mat-card class="current-pay-period-card" appearance="outlined">
+  <mat-card-header class="current-pay-period-card__header">
+    <mat-card-title class="current-pay-period-card__title">Current Pay Period</mat-card-title>
+  </mat-card-header>
+
+  <mat-card-content>
+    @if (loading()) {
+      <div class="current-pay-period-card__state" aria-live="polite">
+        <p>Loading pay period...</p>
+      </div>
+    } @else if (loadError()) {
+      <div class="current-pay-period-card__state current-pay-period-card__state--error">
+        <p>Could not load your pay period details.</p>
+      </div>
+    } @else if (!hasPaySchedule() || !periodStart() || !periodEnd()) {
+      <div class="current-pay-period-card__state">
+        <p>Add your pay schedule to see this period at a glance.</p>
+      </div>
+    } @else {
+      <div class="current-pay-period-card__details">
+        <p class="current-pay-period-card__range">
+          {{ periodStart() | date: 'MMM d' }} - {{ periodEnd() | date: 'MMM d' }}
+        </p>
+        <p class="current-pay-period-card__remaining">{{ daysRemaining() }} days remaining</p>
+
+        <div
+          class="current-pay-period-card__progress"
+          role="progressbar"
+          aria-label="Pay period progress"
+          aria-valuemin="0"
+          aria-valuemax="100"
+          [attr.aria-valuenow]="clampedProgressPercent()"
+        >
+          <span
+            class="current-pay-period-card__progress-fill"
+            [style.width.%]="clampedProgressPercent()"
+          ></span>
+        </div>
+      </div>
+    }
+  </mat-card-content>
+</mat-card>

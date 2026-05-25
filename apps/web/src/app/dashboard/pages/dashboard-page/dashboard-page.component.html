@@ -1,7 +1,13 @@
 <section class="dashboard-layout">
-  <mat-card appearance="outlined">
-    <mat-card-header>
-      <h1>Dashboard</h1>
-    </mat-card-header>
-  </mat-card>
+  <div class="dashboard-grid">
+    <app-current-pay-period-card
+      [loading]="loading()"
+      [loadError]="loadError()"
+      [hasPaySchedule]="hasPaySchedule()"
+      [periodStart]="periodStart()"
+      [periodEnd]="periodEnd()"
+      [daysRemaining]="daysRemaining()"
+      [progressPercent]="progressPercent()"
+    />
+  </div>
 </section>
