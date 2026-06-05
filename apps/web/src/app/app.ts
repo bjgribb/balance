@@ -14,8 +14,6 @@ import {
 import { filter, map, startWith } from 'rxjs';
 import { AuthSessionService } from './auth/services/auth-session.service';
 
-type ThemeMode = 'light' | 'dark';
-
 interface AppNavItem {
   label: string;
   route: string;
@@ -46,7 +44,6 @@ export class App {
 
   private readonly authSession = inject(AuthSessionService);
   private readonly router = inject(Router);
-  private readonly prefersDarkQuery = this.createThemeQuery();
   private readonly isAuthRouteSignal = toSignal(
     this.router.events.pipe(
       filter((event): event is NavigationEnd => event instanceof NavigationEnd),
@@ -84,17 +81,6 @@ export class App {
   protected readonly desktopNavItems = this.navItems;
   protected readonly mobileNavItems = this.navItems;
 
-  constructor() {
-    this.syncToSystemTheme();
-
-    const onSystemThemeChange = (event: MediaQueryListEvent): void => {
-      const mode: ThemeMode = event.matches ? 'dark' : 'light';
-      this.applyTheme(mode);
-    };
-
-    this.prefersDarkQuery.addEventListener('change', onSystemThemeChange);
-  }
-
   protected logout(): void {
     this.authSession.clearSession();
     void this.router.navigateByUrl('/login');
@@ -102,50 +88,5 @@ export class App {
 
   private isAuthUrl(url: string): boolean {
     return url.startsWith('/login') || url.startsWith('/register');
-  }
-
-  private syncToSystemTheme(): void {
-    const mode: ThemeMode = this.prefersDarkQuery.matches ? 'dark' : 'light';
-    this.applyTheme(mode);
-  }
-
-  private createThemeQuery(): MediaQueryList {
-    if (typeof window.matchMedia === 'function') {
-      return window.matchMedia('(prefers-color-scheme: dark)');
-    }
-
-    const noop = (...args: unknown[]): void => {
-      void args;
-    };
-    const alwaysFalse = (event: Event): boolean => {
-      void event;
-      return false;
-    };
-
-    const fallback: MediaQueryList = {
-      matches: false,
-      media: '(prefers-color-scheme: dark)',
-      onchange: null,
-      addEventListener: noop as MediaQueryList['addEventListener'],
-      removeEventListener: noop as MediaQueryList['removeEventListener'],
-      addListener: noop as MediaQueryList['addListener'],
-      removeListener: noop as MediaQueryList['removeListener'],
-      dispatchEvent: alwaysFalse,
-    };
-
-    return fallback;
-  }
-
-  private applyTheme(mode: ThemeMode): void {
-    const root = document.documentElement;
-    root.classList.remove('light-theme', 'dark-theme');
-
-    if (mode === 'light') {
-      root.classList.add('light-theme');
-    }
-
-    if (mode === 'dark') {
-      root.classList.add('dark-theme');
-    }
   }
 }

@@ -1,16 +1,21 @@
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
-import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
+import {
+  ApplicationConfig,
+  inject,
+  provideBrowserGlobalErrorListeners,
+  provideEnvironmentInitializer,
+} from '@angular/core';
 import { provideNativeDateAdapter } from '@angular/material/core';
-import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideRouter } from '@angular/router';
 import { authInterceptor } from './auth/interceptors/auth.interceptor';
+import { ThemeService } from './shared/theme/theme.service';
 
 import { routes } from './app.routes';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
-    provideAnimationsAsync(),
+    provideEnvironmentInitializer(() => inject(ThemeService)),
     provideNativeDateAdapter(),
     provideRouter(routes),
     provideHttpClient(withInterceptors([authInterceptor])),
