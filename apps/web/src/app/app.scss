@@ -10,27 +10,15 @@
   --app-content-padding-bottom: calc(var(--app-mobile-nav-clearance) + 1rem);
   --app-auth-padding-bottom: 1rem;
 
-  --app-bg-spot-primary: rgb(236 98 182 / 16%);
-  --app-bg-spot-secondary: rgb(130 107 255 / 12%);
-  --app-bg-gradient: linear-gradient(152deg, #060812 0%, #0a0f22 52%, #080a17 100%);
-  --app-surface-frost: color-mix(in srgb, #0c0f22 78%, transparent);
-  --app-bottom-frost: color-mix(in srgb, #090c1b 86%, transparent);
-  --app-border-soft: rgb(255 255 255 / 10%);
-  --app-text-title: #f3f5ff;
-  --app-text-nav: rgb(241 235 255 / 82%);
-  --app-accent: #ff9beb;
+  --app-bg-spot-primary: rgb(219 94 191 / 17%);
+  --app-bg-spot-secondary: rgb(126 99 241 / 14%);
+  --app-bg-gradient: linear-gradient(156deg, #120a1f 0%, #1a1331 54%, #110a22 100%);
 }
 
 :host-context(.light-theme) {
-  --app-bg-spot-primary: rgb(232 98 185 / 13%);
-  --app-bg-spot-secondary: rgb(120 95 230 / 10%);
-  --app-bg-gradient: linear-gradient(150deg, #f8f7ff 0%, #f3f1fb 52%, #f7f5ff 100%);
-  --app-surface-frost: color-mix(in srgb, #ffffff 84%, transparent);
-  --app-bottom-frost: color-mix(in srgb, #ffffff 90%, transparent);
-  --app-border-soft: rgb(69 44 96 / 12%);
-  --app-text-title: #221638;
-  --app-text-nav: rgb(46 31 67 / 82%);
-  --app-accent: #bf4cb0;
+  --app-bg-spot-primary: rgb(214 78 182 / 12%);
+  --app-bg-spot-secondary: rgb(112 86 228 / 10%);
+  --app-bg-gradient: linear-gradient(150deg, #fff8ff 0%, #f8f2ff 52%, #fbf6ff 100%);
 }
 
 .app-shell {
@@ -76,13 +64,13 @@
   align-items: center;
   gap: 1rem;
   padding: 0.9rem var(--app-content-padding-inline);
-  background: var(--app-surface-frost);
+  background: color-mix(in srgb, var(--mat-sys-surface-container-high) 84%, transparent);
   backdrop-filter: blur(10px);
-  border-bottom: 1px solid var(--app-border-soft);
+  border-bottom: 1px solid color-mix(in srgb, var(--mat-sys-outline-variant) 58%, transparent);
 }
 
 .topbar__brand {
-  color: var(--app-text-title);
+  color: var(--mat-sys-on-surface);
   text-decoration: none;
   font-size: 1.05rem;
   font-weight: 700;
@@ -92,7 +80,7 @@
 
 .brand {
   display: block;
-  color: var(--app-text-title);
+  color: var(--mat-sys-on-surface);
   text-decoration: none;
   font-size: 1.9rem;
   font-weight: 700;
@@ -144,15 +132,15 @@
   grid-template-columns: repeat(var(--mobile-nav-columns, 3), minmax(0, 1fr));
   gap: 0.35rem;
   padding: 0.45rem 0.55rem calc(0.55rem + env(safe-area-inset-bottom));
-  background: var(--app-bottom-frost);
+  background: color-mix(in srgb, var(--mat-sys-surface-container) 90%, transparent);
   backdrop-filter: blur(12px);
-  border-top: 1px solid var(--app-border-soft);
+  border-top: 1px solid color-mix(in srgb, var(--mat-sys-outline-variant) 58%, transparent);
 }
 
 .mobile-nav__item {
   border: 0;
   background: transparent;
-  color: var(--app-text-nav);
+  color: var(--mat-sys-on-surface-variant);
   text-decoration: none;
   display: inline-flex;
   flex-direction: column;
@@ -172,8 +160,8 @@
 }
 
 .mobile-nav__item--active {
-  color: var(--app-accent);
-  background: color-mix(in srgb, var(--app-accent) 14%, transparent);
+  color: var(--mat-sys-primary);
+  background: color-mix(in srgb, var(--mat-sys-primary) 16%, transparent);
 }
 
 .side-nav__items {
@@ -196,7 +184,7 @@
   border-radius: 10px;
   background: transparent;
   padding: 0.72rem 0.72rem;
-  color: var(--app-text-nav);
+  color: var(--mat-sys-on-surface-variant);
   text-decoration: none;
 }
 
@@ -208,14 +196,14 @@
 }
 
 .nav-link--active {
-  color: var(--app-accent);
-  background: color-mix(in srgb, var(--app-accent) 12%, transparent);
+  color: var(--mat-sys-primary);
+  background: color-mix(in srgb, var(--mat-sys-primary) 14%, transparent);
 }
 
 .nav-link:hover,
 .nav-link:focus-visible {
-  color: var(--app-accent);
-  background: color-mix(in srgb, var(--app-accent) 12%, transparent);
+  color: var(--mat-sys-primary);
+  background: color-mix(in srgb, var(--mat-sys-primary) 14%, transparent);
 }
 
 .nav-link--logout {
@@ -241,8 +229,8 @@
     height: 100vh;
     height: 100dvh;
     padding: 0;
-    border-right: 1px solid var(--app-border-soft);
-    background: color-mix(in srgb, var(--mat-sys-surface) 72%, transparent);
+    border-right: 1px solid color-mix(in srgb, var(--mat-sys-outline-variant) 58%, transparent);
+    background: color-mix(in srgb, var(--mat-sys-surface-container-high) 74%, transparent);
     backdrop-filter: blur(8px);
   }
 

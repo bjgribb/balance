@@ -34,16 +34,12 @@ html {
   @include mat.theme($light-theme);
   color-scheme: light;
 
-  // Semantic destructive tokens used for confirmation dialogs and destructive actions.
-  --app-semantic-danger: #b42318;
-  --app-semantic-on-danger: #ffffff;
-  --app-semantic-danger-fg: #9b1f16;
-  --app-semantic-success: #1f7a4a;
-  --app-semantic-on-success: #ffffff;
-  --app-semantic-success-fg: #16603a;
-  --app-semantic-warning: #b25e00;
-  --app-semantic-on-warning: #ffffff;
-  --app-semantic-warning-fg: #8a4800;
+  // Semantic tokens used by toasts and destructive actions.
+  --app-semantic-danger: var(--mat-sys-error);
+  --app-semantic-on-danger: var(--mat-sys-on-error);
+  --app-semantic-danger-fg: var(--mat-sys-error);
+  --app-semantic-success: color-mix(in srgb, var(--mat-sys-tertiary) 78%, #0f6d43);
+  --app-semantic-warning: #9a4f00;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -57,16 +53,23 @@ html {
   @include mat.theme($dark-theme);
   color-scheme: dark;
 
-  // Slightly brighter destructive color for dark surfaces while keeping text contrast.
-  --app-semantic-danger: #d92d20;
-  --app-semantic-on-danger: #ffffff;
-  --app-semantic-danger-fg: #ff8a80;
-  --app-semantic-success: #2bb673;
-  --app-semantic-on-success: #06150d;
-  --app-semantic-success-fg: #7ef0b8;
-  --app-semantic-warning: #f59e0b;
-  --app-semantic-on-warning: #1a1200;
-  --app-semantic-warning-fg: #ffd58a;
+  --app-semantic-danger: var(--mat-sys-error);
+  --app-semantic-on-danger: var(--mat-sys-on-error);
+  --app-semantic-danger-fg: color-mix(in srgb, var(--mat-sys-error) 72%, white);
+  --app-semantic-success: color-mix(in srgb, var(--mat-sys-tertiary) 82%, #66db9d);
+  --app-semantic-warning: #ffb020;
+}
+
+.mat-mdc-dialog-surface {
+  background: var(--mat-sys-surface-container-high);
+  border: 1px solid color-mix(in srgb, var(--mat-sys-outline-variant) 58%, transparent);
+  box-shadow: 0 18px 42px rgb(0 0 0 / 28%);
+}
+
+.dark-theme .mat-mdc-dialog-surface {
+  background: color-mix(in srgb, var(--mat-sys-surface-container-high) 92%, #111827);
+  border: 1px solid color-mix(in srgb, var(--mat-sys-outline) 58%, transparent);
+  box-shadow: 0 24px 56px rgb(0 0 0 / 62%);
 }
 
 body {
