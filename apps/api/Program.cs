@@ -8,6 +8,15 @@ using Microsoft.IdentityModel.Tokens;
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 var webClientCorsPolicy = "WebClient";
 
+string? defaultConnectionFromEnv = Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection");
+if (!string.IsNullOrWhiteSpace(defaultConnectionFromEnv))
+{
+    builder.Configuration["ConnectionStrings:DefaultConnection"] = defaultConnectionFromEnv;
+}
+
+string port = Environment.GetEnvironmentVariable("PORT") ?? "5000";
+builder.WebHost.UseUrls($"http://*:{port}");
+
 builder.Services.AddControllers();
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);

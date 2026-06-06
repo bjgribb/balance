@@ -1,0 +1,8 @@
+[phases.build]
+cmds = [
+  "dotnet tool install --global dotnet-ef",
+  "dotnet publish -c Release -o out"
+]
+
+[start]
+cmd = "export PATH=\"$PATH:/root/.dotnet/tools\" && dotnet ef database update --project api.csproj --no-build && dotnet out/api.dll"
