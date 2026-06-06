@@ -1,8 +1,9 @@
 [phases.build]
 cmds = [
   "dotnet tool install --global dotnet-ef",
+  "export PATH=\"$PATH:/root/.dotnet/tools\" && dotnet ef migrations bundle --self-contained -r linux-x64 --project api.csproj --output out/efbundle",
   "dotnet publish -c Release -o out"
 ]
 
 [start]
-cmd = "export PATH=\"$PATH:/root/.dotnet/tools\" && dotnet ef database update --project api.csproj --no-build && dotnet out/api.dll"
+cmd = "chmod +x out/efbundle && ./out/efbundle --connection \"$ConnectionStrings__DefaultConnection\" && dotnet out/api.dll"

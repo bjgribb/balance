@@ -32,3 +32,13 @@ This API uses a lightweight Clean Architecture style that keeps boundaries clear
 - Service: `Application/Todos/TodoService.cs`
 - Repository: `Infrastructure/Repositories/TodoRepository.cs`
 - API: `Controllers/TodosController.cs`
+
+## Railway Deployment Notes
+
+- API deploy uses `apps/api/nixpacks.toml` to build an EF Core migration bundle.
+- On container start, the bundle runs first to apply pending migrations, then the API starts.
+- Ensure Railway service variables include:
+  - `ConnectionStrings__DefaultConnection` (Railway Postgres connection string)
+  - `Jwt__SecretKey`
+  - `Jwt__Issuer`
+  - `Jwt__Audience`
