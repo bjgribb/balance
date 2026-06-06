@@ -8,7 +8,9 @@ using Microsoft.IdentityModel.Tokens;
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 var webClientCorsPolicy = "WebClient";
 
-string? defaultConnectionFromEnv = Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection");
+string? defaultConnectionFromEnv =
+    Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection")
+    ?? Environment.GetEnvironmentVariable("DATABASE_URL");
 if (!string.IsNullOrWhiteSpace(defaultConnectionFromEnv))
 {
     builder.Configuration["ConnectionStrings:DefaultConnection"] = defaultConnectionFromEnv;

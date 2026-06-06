@@ -6,4 +6,4 @@ cmds = [
 ]
 
 [start]
-cmd = "chmod +x out/efbundle && ./out/efbundle --connection \"$ConnectionStrings__DefaultConnection\" && dotnet out/api.dll"
+cmd = "DB_CONN=\"${ConnectionStrings__DefaultConnection:-$DATABASE_URL}\" && chmod +x out/efbundle && ./out/efbundle --connection \"$DB_CONN\" && dotnet out/api.dll"
