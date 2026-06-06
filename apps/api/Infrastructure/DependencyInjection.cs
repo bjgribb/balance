@@ -15,10 +15,15 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
-        var connectionString = configuration.GetConnectionString("DefaultConnection");
+        var connectionString = configuration.GetConnectionString("DefaultConnection")
+            ?? configuration["ConnectionStrings:DefaultConnection"]
+            ?? Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection")
+            ?? Environment.GetEnvironmentVariable("DATABASE_URL");
+
         if (string.IsNullOrWhiteSpace(connectionString))
         {
-            throw new InvalidOperationException("Connection string 'DefaultConnection' was not found.");
+            throw new InvalidOperationException(
+                "Connection string 'DefaultConnection' was not found. Set 'ConnectionStrings__DefaultConnection' or 'DATABASE_URL'.");
         }
 
         services.Configure<JwtSettings>(configuration.GetSection(JwtSettings.SectionName));
