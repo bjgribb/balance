@@ -1,6 +1,9 @@
 {
   "$schema": "https://railway.app/railway.schema.json",
+  "build": {
+    "buildCommand": "dotnet tool install --global dotnet-ef && export PATH=\"$PATH:/root/.dotnet/tools\" && dotnet publish -c Release -o out && dotnet ef migrations bundle --no-build -o out/efbundle --project ."
+  },
   "deploy": {
-    "preDeployCommand": "dotnet ef database update"
+    "preDeployCommand": "./out/efbundle"
   }
 }
