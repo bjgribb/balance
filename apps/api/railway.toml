@@ -1,10 +1,12 @@
 [build]
-cmd = [
-  "dotnet tool install --global dotnet-ef",
-  "export PATH=\"$PATH:/root/.dotnet/tools\" && dotnet ef migrations bundle --self-contained -r linux-x64 --project api.csproj --output out/efbundle",
-  "dotnet publish -c Release -o out"
-]
+builder = "NIXPACKS"
+buildCommand = "dotnet tool install --global dotnet-ef && /root/.dotnet/tools/dotnet-ef migrations bundle --self-contained -r linux-x64 --project api.csproj --output out/efbundle && dotnet publish -c Release -o out"
 
-[start]
-cmd = "DB_CONN=\"${ConnectionStrings__DefaultConnection:-$DATABASE_URL}\" && chmod +x out/efbundle && ./out/efbundle --connection \"$DB_CONN\" && dotnet out/api.dll"
+[deploy]
+preDeployCommand = "DB_CONN=\"${ConnectionStrings__DefaultConnection:-$DATABASE_URL}\" && if [ -z \"$DB_CONN\" ]; then echo 'Missing ConnectionStrings__DefaultConnection or DATABASE_URL'; exit 1; fi && ./out/efbundle --connection \"$DB_CONN\""
+startCommand = "dotnet out/api.dll"
+healthcheckPath = "/health"
+healthcheckTimeout = 120
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 10
 

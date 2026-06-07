@@ -35,8 +35,8 @@ This API uses a lightweight Clean Architecture style that keeps boundaries clear
 
 ## Railway Deployment Notes
 
-- API deploy uses `apps/api/nixpacks.toml` to build an EF Core migration bundle.
-- On container start, the bundle runs first to apply pending migrations, then the API starts.
+- API deploy uses `apps/api/railway.toml` to build an EF Core migration bundle and publish the app.
+- A Railway pre-deploy command runs the migration bundle before the new deployment is made active.
 - Ensure Railway service variables include:
   - `ConnectionStrings__DefaultConnection` (Railway Postgres connection string)
   - `Jwt__SecretKey`
