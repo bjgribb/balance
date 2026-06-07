@@ -13,4 +13,6 @@ FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 WORKDIR /app
 
 COPY --from=build /app/out ./out
+COPY --from=build /src/scripts ./scripts
 RUN chmod +x /app/out/efbundle
+RUN chmod +x /app/scripts/predeploy.sh
