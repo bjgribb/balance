@@ -14,6 +14,8 @@ public class ApplicationDbContextFactory : IDesignTimeDbContextFactory<Applicati
             // EF design-time operations only need a valid provider configuration.
             ?? "Host=localhost;Port=5432;Database=design_time;Username=design_time;Password=design_time";
 
+        connectionString = PostgresConnectionString.Normalize(connectionString);
+
         var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
         optionsBuilder.UseNpgsql(connectionString).UseSnakeCaseNamingConvention();
 

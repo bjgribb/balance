@@ -2,6 +2,7 @@ using System.Text;
 using api.Application;
 using api.Infrastructure;
 using api.Infrastructure.Auth;
+using api.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 
@@ -13,7 +14,8 @@ string? defaultConnectionFromEnv =
     ?? Environment.GetEnvironmentVariable("DATABASE_URL");
 if (!string.IsNullOrWhiteSpace(defaultConnectionFromEnv))
 {
-    builder.Configuration["ConnectionStrings:DefaultConnection"] = defaultConnectionFromEnv;
+    builder.Configuration["ConnectionStrings:DefaultConnection"] =
+        PostgresConnectionString.Normalize(defaultConnectionFromEnv);
 }
 
 string port = Environment.GetEnvironmentVariable("PORT") ?? "5000";

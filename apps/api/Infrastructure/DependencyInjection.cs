@@ -26,6 +26,8 @@ public static class DependencyInjection
                 "Connection string 'DefaultConnection' was not found. Set 'ConnectionStrings__DefaultConnection' or 'DATABASE_URL'.");
         }
 
+        connectionString = PostgresConnectionString.Normalize(connectionString);
+
         services.Configure<JwtSettings>(configuration.GetSection(JwtSettings.SectionName));
 
         services.AddDbContext<ApplicationDbContext>(options =>
