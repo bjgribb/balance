@@ -3,7 +3,7 @@ builder = "DOCKERFILE"
 dockerfilePath = "Dockerfile"
 
 [deploy]
-preDeployCommand = "set -ex; echo 'Starting EF pre-deploy migration'; echo \"PWD=$(pwd)\"; DB_CONN=\"${ConnectionStrings__DefaultConnection:-$DATABASE_URL}\"; if [ -z \"$DB_CONN\" ]; then echo 'Missing ConnectionStrings__DefaultConnection or DATABASE_URL'; exit 1; fi; if [ ! -x /app/out/efbundle ]; then echo 'Migration bundle not found or not executable at /app/out/efbundle'; ls -la /app/out || true; exit 1; fi; /app/out/efbundle --verbose --connection \"$DB_CONN\" 2>&1 || { exit_code=$?; echo \"EF migration bundle failed with exit code ${exit_code}\"; ls -la /app/out || true; exit ${exit_code}; }"
+preDeployCommand = "sh /app/scripts/predeploy.sh"
 startCommand = "dotnet out/api.dll"
 healthcheckPath = "/health"
 healthcheckTimeout = 120
