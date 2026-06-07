@@ -19,7 +19,7 @@ if (!string.IsNullOrWhiteSpace(defaultConnectionFromEnv))
 }
 
 string port = Environment.GetEnvironmentVariable("PORT") ?? "5000";
-builder.WebHost.UseUrls($"http://*:{port}");
+builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
 
 var allowedCorsOrigins = builder.Configuration
     .GetSection("Cors:AllowedOrigins")
