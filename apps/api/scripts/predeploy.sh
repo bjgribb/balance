@@ -1,11 +1,7 @@
 #!/usr/bin/env sh
 set -eu
 
-echo "Starting EF pre-deploy migration"
-echo "PWD=$(pwd)"
-
-echo "Listing /app/out contents before migration"
-ls -la /app/out || true
+echo "Running EF pre-deploy migration"
 
 if [ -z "${ConnectionStrings__DefaultConnection:-}" ] && [ -z "${DATABASE_URL:-}" ]; then
   echo "Missing ConnectionStrings__DefaultConnection or DATABASE_URL"
@@ -17,6 +13,6 @@ if [ ! -x /app/out/efbundle ]; then
   exit 1
 fi
 
-/app/out/efbundle --verbose
+/app/out/efbundle
 
-echo "EF pre-deploy migration completed successfully"
+echo "EF pre-deploy migration completed"
