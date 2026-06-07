@@ -35,7 +35,7 @@ This API uses a lightweight Clean Architecture style that keeps boundaries clear
 
 ## Railway Deployment Notes
 
-- API deploy uses `apps/api/railway.toml` to build an EF Core migration bundle and publish the app.
+- API deploy uses `apps/api/railway.toml` with `apps/api/Dockerfile` (pinned to .NET 10 SDK/runtime) to build the publish output and EF Core migration bundle.
 - A Railway pre-deploy command runs the migration bundle before the new deployment is made active.
 - Ensure Railway service variables include:
   - `ConnectionStrings__DefaultConnection` (Railway Postgres connection string)

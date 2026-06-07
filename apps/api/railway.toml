@@ -1,6 +1,6 @@
 [build]
-builder = "NIXPACKS"
-buildCommand = "dotnet tool install --global dotnet-ef && /root/.dotnet/tools/dotnet-ef migrations bundle --self-contained -r linux-x64 --project api.csproj --output out/efbundle && dotnet publish -c Release -o out"
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
 
 [deploy]
 preDeployCommand = "DB_CONN=\"${ConnectionStrings__DefaultConnection:-$DATABASE_URL}\" && if [ -z \"$DB_CONN\" ]; then echo 'Missing ConnectionStrings__DefaultConnection or DATABASE_URL'; exit 1; fi && ./out/efbundle --connection \"$DB_CONN\""
