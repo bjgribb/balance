@@ -25,9 +25,6 @@ if (string.IsNullOrWhiteSpace(resolvedConnectionString))
         "Missing required connection string. Set ConnectionStrings__DefaultConnection or DATABASE_URL.");
 }
 
-string port = Environment.GetEnvironmentVariable("PORT") ?? "5000";
-builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
-
 var configuredCorsOrigins = builder.Configuration
     .GetSection("Cors:AllowedOrigins")
     .Get<string[]>()
