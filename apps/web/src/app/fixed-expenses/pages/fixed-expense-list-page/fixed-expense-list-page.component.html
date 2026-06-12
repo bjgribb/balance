@@ -1,235 +1,95 @@
-<section class="fixed-expenses-layout">
-  <mat-card class="fixed-expenses-card" appearance="outlined">
-    <mat-card-header class="fixed-expenses-card__header">
-      <div class="fixed-expenses-card__header-main">
-        <mat-card-title class="fixed-expenses-card__title">Fixed Expenses</mat-card-title>
-        <button
-          mat-flat-button
-          type="button"
-          [disabled]="saving()"
-          (click)="openAddExpenseDialog()"
-        >
-          Add expense
-        </button>
-      </div>
-    </mat-card-header>
+<div class="fixed-expenses-card__header">
+  <div class="fixed-expenses-card__title">Fixed Expenses</div>
+  <button
+    matButton="filled"
+    aria-label="Add fixed expense"
+    type="button"
+    [disabled]="saving()"
+    (click)="openAddExpenseDialog()"
+  >
+    <mat-icon>add</mat-icon>
+    Add
+  </button>
+</div>
 
-    <mat-card-content class="fixed-expenses-card__content" [attr.aria-busy]="isBusy()">
-      @if (loading()) {
-        <div class="fixed-expenses-card__loading" aria-live="polite">
-          <mat-spinner diameter="28" />
-          <p>Loading your fixed expenses...</p>
-        </div>
-      } @else if (loadError()) {
-        <div class="fixed-expenses-card__state">
-          <h2>Could not load fixed expenses</h2>
-          <p>Try again to refresh your recurring bills.</p>
-          <button mat-button type="button" (click)="reload()">Try again</button>
-        </div>
-      } @else if (expenses().length === 0) {
-        <div class="fixed-expenses-card__state">
-          <h2>No fixed expenses yet</h2>
-          <p>Use Add expense to add your first recurring bill.</p>
-        </div>
-      } @else {
-        <ul class="expense-list" aria-label="Fixed expenses list">
-          @for (expense of expenses(); track trackById($index, expense)) {
-            <li class="expense-list__item">
-              <article class="expense-item">
-                <div class="expense-item__main">
-                  <h2>{{ expense.name }}</h2>
-                  <p class="expense-item__amount">
-                    {{ expense.amount | currency: 'USD' : 'symbol' : '1.2-2' }}
-                  </p>
-                </div>
+<div class="fixed-expenses-card" [attr.aria-busy]="isBusy()">
+  @if (loading()) {
+    <div class="fixed-expenses-card__loading" aria-live="polite">
+      <mat-spinner diameter="28" />
+      <p>Loading your fixed expenses...</p>
+    </div>
+  } @else if (loadError()) {
+    <div class="fixed-expenses-card__state">
+      <h2>Could not load fixed expenses</h2>
+      <p>Try again to refresh your recurring bills.</p>
+      <button mat-button type="button" (click)="reload()">Try again</button>
+    </div>
+  } @else if (expenses().length === 0) {
+    <div class="fixed-expenses-card__state">
+      <h2>No fixed expenses yet</h2>
+      <p>Use Add expense to add your first recurring bill.</p>
+    </div>
+  } @else {
+    <ul class="expense-list" aria-label="Fixed expenses list">
+      @for (expense of expenses(); track trackById($index, expense)) {
+        <li class="expense-list__item">
+          <article class="expense-item">
+            <div class="expense-item__main">
+              <h2>{{ expense.name }}</h2>
+              <p class="expense-item__amount">
+                {{ expense.amount | currency: 'USD' : 'symbol' : '1.2-2' }}
+              </p>
+            </div>
 
-                <div class="expense-item__actions">
-                  <button
-                    mat-icon-button
-                    type="button"
-                    [disabled]="isDeleting(expense.id)"
-                    [attr.aria-label]="'Edit ' + expense.name"
-                    (click)="startEdit(expense)"
-                  >
-                    <mat-icon>edit</mat-icon>
-                  </button>
-                  <button
-                    mat-icon-button
-                    type="button"
-                    class="expense-item__delete"
-                    [disabled]="isDeleting(expense.id)"
-                    [attr.aria-label]="'Remove ' + expense.name"
-                    (click)="deleteExpense(expense)"
-                  >
-                    <mat-icon>{{ isDeleting(expense.id) ? 'hourglass_top' : 'delete' }}</mat-icon>
-                  </button>
-                </div>
+            <div class="expense-item__actions">
+              <button
+                mat-icon-button
+                type="button"
+                [disabled]="updating() || isDeleting(expense.id)"
+                [attr.aria-label]="'Edit ' + expense.name"
+                (click)="openEditExpenseDialog(expense)"
+              >
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button
+                mat-icon-button
+                type="button"
+                class="expense-item__delete"
+                [disabled]="isDeleting(expense.id)"
+                [attr.aria-label]="'Remove ' + expense.name"
+                (click)="deleteExpense(expense)"
+              >
+                <mat-icon>{{ isDeleting(expense.id) ? 'hourglass_top' : 'delete' }}</mat-icon>
+              </button>
+            </div>
 
-                <mat-chip class="expense-item__status" [highlighted]="expense.isActive">
-                  {{ expense.isActive ? 'Active' : 'Paused' }}
-                </mat-chip>
+            <mat-chip class="expense-item__status" [highlighted]="expense.isActive">
+              {{ expense.isActive ? 'Active' : 'Paused' }}
+            </mat-chip>
 
-                <dl class="expense-item__details">
-                  <div>
-                    <dt>Recurrence</dt>
-                    <dd>{{ recurrenceLabel(expense) }}</dd>
-                  </div>
-                  <div>
-                    <dt>Due date</dt>
-                    <dd>{{ expense.anchorDate | date: 'M/d/yyyy' }}</dd>
-                  </div>
-                  <div>
-                    <dt>Next due</dt>
-                    <dd>
-                      @if (nextDueDateLabel(expense)) {
-                        {{ nextDueDateLabel(expense) | date: 'M/d/yyyy' }}
-                      } @else {
-                        Not scheduled
-                      }
-                    </dd>
-                  </div>
-                </dl>
-
-                @if (isEditing(expense.id)) {
-                  <form
-                    class="expense-item__edit-form"
-                    [formGroup]="editForm"
-                    (ngSubmit)="submitUpdate(expense.id)"
-                    novalidate
-                  >
-                    <mat-form-field class="expense-item__field" appearance="outline">
-                      <mat-label>Expense name</mat-label>
-                      <input matInput formControlName="name" maxlength="200" />
-                      @if (
-                        editForm.controls.name.touched &&
-                        editForm.controls.name.hasError('required')
-                      ) {
-                        <mat-error>Name is required.</mat-error>
-                      }
-                      @if (
-                        editForm.controls.name.touched &&
-                        editForm.controls.name.hasError('maxlength')
-                      ) {
-                        <mat-error>Name must be 200 characters or fewer.</mat-error>
-                      }
-                    </mat-form-field>
-
-                    <div class="expense-item__row">
-                      <mat-form-field class="expense-item__field" appearance="outline">
-                        <mat-label>Amount</mat-label>
-                        <input
-                          matInput
-                          type="number"
-                          inputmode="decimal"
-                          min="0.01"
-                          step="0.01"
-                          formControlName="amount"
-                        />
-                        <span matTextPrefix>$&nbsp;</span>
-                        @if (
-                          editForm.controls.amount.touched &&
-                          editForm.controls.amount.hasError('required')
-                        ) {
-                          <mat-error>Amount is required.</mat-error>
-                        }
-                        @if (
-                          editForm.controls.amount.touched &&
-                          editForm.controls.amount.hasError('min')
-                        ) {
-                          <mat-error>Amount must be greater than $0.00.</mat-error>
-                        }
-                      </mat-form-field>
-
-                      <mat-form-field class="expense-item__field" appearance="outline">
-                        <mat-label>Due date</mat-label>
-                        <input
-                          matInput
-                          [matDatepicker]="editAnchorDatePicker"
-                          formControlName="anchorDate"
-                        />
-                        <mat-datepicker-toggle matIconSuffix [for]="editAnchorDatePicker" />
-                        <mat-datepicker #editAnchorDatePicker />
-                        @if (
-                          editForm.controls.anchorDate.touched &&
-                          editForm.controls.anchorDate.hasError('required')
-                        ) {
-                          <mat-error>Due date is required.</mat-error>
-                        }
-                      </mat-form-field>
-                    </div>
-
-                    <div class="expense-item__row">
-                      <mat-form-field class="expense-item__field" appearance="outline">
-                        <mat-label>Recurrence</mat-label>
-                        <mat-select formControlName="recurrenceUnit">
-                          @for (option of recurrenceOptions; track option.value) {
-                            <mat-option [value]="option.value">{{ option.label }}</mat-option>
-                          }
-                        </mat-select>
-                        @if (
-                          editForm.controls.recurrenceUnit.touched &&
-                          editForm.controls.recurrenceUnit.hasError('required')
-                        ) {
-                          <mat-error>Recurrence is required.</mat-error>
-                        }
-                      </mat-form-field>
-
-                      <mat-form-field class="expense-item__field" appearance="outline">
-                        <mat-label>Frequency</mat-label>
-                        <input
-                          matInput
-                          type="number"
-                          inputmode="numeric"
-                          min="1"
-                          step="1"
-                          formControlName="recurrenceInterval"
-                        />
-                        <mat-hint>1 means every recurrence, 2 means every other one.</mat-hint>
-                        @if (
-                          editForm.controls.recurrenceInterval.touched &&
-                          editForm.controls.recurrenceInterval.hasError('required')
-                        ) {
-                          <mat-error>Recurrence interval is required.</mat-error>
-                        }
-                        @if (
-                          editForm.controls.recurrenceInterval.touched &&
-                          editForm.controls.recurrenceInterval.hasError('min')
-                        ) {
-                          <mat-error>Recurrence interval must be at least 1.</mat-error>
-                        }
-                      </mat-form-field>
-                    </div>
-
-                    <mat-form-field class="expense-item__field" appearance="outline">
-                      <mat-label>Skip until date (optional)</mat-label>
-                      <input
-                        matInput
-                        [matDatepicker]="editSkipUntilDatePicker"
-                        formControlName="skipUntilDate"
-                      />
-                      <mat-datepicker-toggle matIconSuffix [for]="editSkipUntilDatePicker" />
-                      <mat-datepicker #editSkipUntilDatePicker />
-                    </mat-form-field>
-
-                    <mat-checkbox formControlName="isActive">Expense is active</mat-checkbox>
-
-                    <div class="expense-item__edit-actions">
-                      <button mat-button type="button" (click)="cancelEdit()">Cancel</button>
-                      <button
-                        mat-flat-button
-                        type="submit"
-                        [disabled]="updating() || editForm.invalid"
-                      >
-                        {{ updating() ? 'Saving...' : 'Save changes' }}
-                      </button>
-                    </div>
-                  </form>
-                }
-              </article>
-            </li>
-          }
-        </ul>
+            <dl class="expense-item__details">
+              <div>
+                <dt>Recurrence</dt>
+                <dd>{{ recurrenceLabel(expense) }}</dd>
+              </div>
+              <div>
+                <dt>Due date</dt>
+                <dd>{{ expense.anchorDate | date: 'M/d/yyyy' }}</dd>
+              </div>
+              <div>
+                <dt>Next due</dt>
+                <dd>
+                  @if (nextDueDateLabel(expense)) {
+                    {{ nextDueDateLabel(expense) | date: 'M/d/yyyy' }}
+                  } @else {
+                    Not scheduled
+                  }
+                </dd>
+              </div>
+            </dl>
+          </article>
+        </li>
       }
-    </mat-card-content>
-  </mat-card>
-</section>
+    </ul>
+  }
+</div>

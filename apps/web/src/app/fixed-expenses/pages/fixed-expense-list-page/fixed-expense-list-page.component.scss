@@ -1,29 +1,15 @@
-:host {
-  display: block;
-  width: 100%;
-}
-
-.fixed-expenses-layout {
-  width: 100%;
-}
-
 .fixed-expenses-card {
   width: 100%;
   border-radius: 20px;
-  background: color-mix(in srgb, var(--mat-sys-surface) 92%, transparent);
-  padding: 1rem;
 }
 
 .fixed-expenses-card__header {
-  padding-bottom: 1rem;
-}
-
-.fixed-expenses-card__header-main {
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
+  padding-block-end: 1rem;
 }
 
 .fixed-expenses-card__title {
@@ -68,6 +54,9 @@
 }
 
 .expense-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
   list-style: none;
   margin: 0;
   padding: 0;
@@ -76,6 +65,7 @@
 }
 
 .expense-item {
+  background: color-mix(in srgb, var(--mat-sys-surface) 92%, transparent);
   border: 1px solid color-mix(in srgb, var(--mat-sys-outline-variant) 45%, transparent);
   border-radius: 16px;
   padding: 0.9rem;

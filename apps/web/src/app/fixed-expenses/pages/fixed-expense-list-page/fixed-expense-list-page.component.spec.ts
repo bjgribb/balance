@@ -156,6 +156,8 @@ describe('FixedExpenseListPageComponent', () => {
     component.openAddExpenseDialog();
     fixture.detectChanges();
 
+    expect(dialogStub.open).toHaveBeenCalled();
+
     expect(apiStub.create).toHaveBeenCalledWith({
       name: 'Internet',
       amount: 79.99,
@@ -203,10 +205,20 @@ describe('FixedExpenseListPageComponent', () => {
     );
   });
 
-  it('submits edit form and updates the existing expense', () => {
+  it('updates an expense from the edit dialog result', () => {
     fixture.detectChanges();
+    dialogStub.nextResult = {
+      name: 'Electric Bill Updated',
+      amount: 125,
+      anchorDate: '2026-05-10',
+      recurrenceUnit: RecurrenceUnit.Month,
+      recurrenceInterval: 1,
+      skipUntilDate: null,
+      isActive: false,
+    };
+
     const component = fixture.componentInstance as unknown as {
-      startEdit(expense: {
+      openEditExpenseDialog(expense: {
         id: string;
         name: string;
         amount: number;
@@ -218,21 +230,9 @@ describe('FixedExpenseListPageComponent', () => {
         nextDueDate: string | null;
         createdAtUtc: string;
       }): void;
-      editForm: {
-        setValue(value: {
-          name: string;
-          amount: number;
-          anchorDate: Date;
-          recurrenceUnit: RecurrenceUnit;
-          recurrenceInterval: number;
-          skipUntilDate: null;
-          isActive: boolean;
-        }): void;
-      };
-      submitUpdate(expenseId: string): void;
     };
 
-    component.startEdit({
+    component.openEditExpenseDialog({
       id: 'existing-expense-id',
       name: 'Electric Bill',
       amount: 120,
@@ -244,19 +244,9 @@ describe('FixedExpenseListPageComponent', () => {
       nextDueDate: '2026-06-01',
       createdAtUtc: '2026-05-01T00:00:00Z',
     });
-
-    component.editForm.setValue({
-      name: 'Electric Bill Updated',
-      amount: 125,
-      anchorDate: new Date(2026, 4, 10),
-      recurrenceUnit: RecurrenceUnit.Month,
-      recurrenceInterval: 1,
-      skipUntilDate: null,
-      isActive: false,
-    });
-
-    component.submitUpdate('existing-expense-id');
     fixture.detectChanges();
+
+    expect(dialogStub.open).toHaveBeenCalled();
 
     expect(apiStub.update).toHaveBeenCalledWith('existing-expense-id', {
       name: 'Electric Bill Updated',
@@ -282,9 +272,18 @@ describe('FixedExpenseListPageComponent', () => {
     apiStub.update.mockReturnValue(
       throwError(() => new HttpErrorResponse({ status: 500, statusText: 'Server Error' })),
     );
+    dialogStub.nextResult = {
+      name: 'Electric Bill Updated',
+      amount: 125,
+      anchorDate: '2026-05-10',
+      recurrenceUnit: RecurrenceUnit.Month,
+      recurrenceInterval: 1,
+      skipUntilDate: null,
+      isActive: false,
+    };
 
     const component = fixture.componentInstance as unknown as {
-      startEdit(expense: {
+      openEditExpenseDialog(expense: {
         id: string;
         name: string;
         amount: number;
@@ -296,10 +295,9 @@ describe('FixedExpenseListPageComponent', () => {
         nextDueDate: string | null;
         createdAtUtc: string;
       }): void;
-      submitUpdate(expenseId: string): void;
     };
 
-    component.startEdit({
+    component.openEditExpenseDialog({
       id: 'existing-expense-id',
       name: 'Electric Bill',
       amount: 120,
@@ -311,8 +309,6 @@ describe('FixedExpenseListPageComponent', () => {
       nextDueDate: '2026-06-01',
       createdAtUtc: '2026-05-01T00:00:00Z',
     });
-
-    component.submitUpdate('existing-expense-id');
     fixture.detectChanges();
 
     expect(toastStub.error).toHaveBeenCalledWith(

@@ -1,22 +1,19 @@
 import { CurrencyPipe, DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
-import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatChipsModule } from '@angular/material/chips';
-import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatDialog } from '@angular/material/dialog';
-import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
-import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSelectModule } from '@angular/material/select';
 import { finalize } from 'rxjs';
 import { ConfirmDialogService } from '../../../shared/confirm-dialog/confirm-dialog.service';
 import { ToastMessageService } from '../../../shared/toast-message/toast-message.service';
-import { AddFixedExpenseDialogComponent } from '../../components/add-fixed-expense-dialog/add-fixed-expense-dialog.component';
+import {
+  FixedExpenseDialogComponent,
+  type FixedExpenseDialogData,
+} from '../../components/fixed-expense-dialog/fixed-expense-dialog.component';
 import {
   type CreateFixedExpenseRequest,
   type FixedExpenseResponse,
@@ -25,25 +22,14 @@ import {
 } from '../../models/fixed-expense.models';
 import { FixedExpenseApiService } from '../../services/fixed-expense-api.service';
 
-interface RecurrenceOption {
-  readonly value: RecurrenceUnit;
-  readonly label: string;
-}
-
 @Component({
   selector: 'app-fixed-expense-list-page',
   imports: [
-    ReactiveFormsModule,
     MatCardModule,
     MatButtonModule,
-    MatCheckboxModule,
     MatChipsModule,
-    MatDatepickerModule,
-    MatFormFieldModule,
     MatIconModule,
-    MatInputModule,
     MatProgressSpinnerModule,
-    MatSelectModule,
     DatePipe,
     CurrencyPipe,
   ],
@@ -52,7 +38,6 @@ interface RecurrenceOption {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FixedExpenseListPageComponent {
-  private readonly fb = inject(FormBuilder);
   private readonly dialog = inject(MatDialog);
   private readonly confirmDialog = inject(ConfirmDialogService);
   private readonly fixedExpenseApi = inject(FixedExpenseApiService);
@@ -63,27 +48,7 @@ export class FixedExpenseListPageComponent {
   protected readonly updating = signal(false);
   protected readonly deletingExpenseId = signal<string | null>(null);
   protected readonly expenses = signal<FixedExpenseResponse[]>([]);
-  protected readonly editingExpenseId = signal<string | null>(null);
   protected readonly loadError = signal(false);
-
-  protected readonly recurrenceOptions: readonly RecurrenceOption[] = [
-    { value: RecurrenceUnit.Day, label: 'Day' },
-    { value: RecurrenceUnit.Week, label: 'Week' },
-    { value: RecurrenceUnit.Month, label: 'Month' },
-  ];
-
-  protected readonly editForm = this.fb.group({
-    name: this.fb.control('', [Validators.required, Validators.maxLength(200)]),
-    amount: this.fb.control<number | null>(null, [Validators.required, Validators.min(0.01)]),
-    anchorDate: this.fb.control<Date | null>(null, Validators.required),
-    recurrenceUnit: this.fb.control<RecurrenceUnit | null>(null, Validators.required),
-    recurrenceInterval: this.fb.control<number | null>(null, [
-      Validators.required,
-      Validators.min(1),
-    ]),
-    skipUntilDate: this.fb.control<Date | null>(null),
-    isActive: this.fb.control(true, Validators.required),
-  });
 
   constructor() {
     this.loadExpenses();
@@ -113,13 +78,7 @@ export class FixedExpenseListPageComponent {
   }
 
   protected openAddExpenseDialog(): void {
-    this.dialog
-      .open(AddFixedExpenseDialogComponent, {
-        autoFocus: false,
-        restoreFocus: true,
-        width: 'min(42rem, calc(100vw - 1rem))',
-        maxWidth: 'calc(100vw - 1rem)',
-      })
+    this.openExpenseDialog({ mode: 'create' })
       .afterClosed()
       .subscribe((payload: CreateFixedExpenseRequest | undefined) => {
         if (!payload) {
@@ -127,6 +86,18 @@ export class FixedExpenseListPageComponent {
         }
 
         this.createExpense(payload);
+      });
+  }
+
+  protected openEditExpenseDialog(expense: FixedExpenseResponse): void {
+    this.openExpenseDialog({ mode: 'edit', expense })
+      .afterClosed()
+      .subscribe((payload: UpdateFixedExpenseRequest | undefined) => {
+        if (!payload) {
+          return;
+        }
+
+        this.updateExpense(expense.id, payload);
       });
   }
 
@@ -154,44 +125,7 @@ export class FixedExpenseListPageComponent {
       });
   }
 
-  protected isEditing(expenseId: string): boolean {
-    return this.editingExpenseId() === expenseId;
-  }
-
-  protected startEdit(expense: FixedExpenseResponse): void {
-    this.editingExpenseId.set(expense.id);
-    this.editForm.reset({
-      name: expense.name,
-      amount: expense.amount,
-      anchorDate: this.fromApiDate(expense.anchorDate),
-      recurrenceUnit: expense.recurrenceUnit,
-      recurrenceInterval: expense.recurrenceInterval,
-      skipUntilDate: expense.skipUntilDate ? this.fromApiDate(expense.skipUntilDate) : null,
-      isActive: expense.isActive,
-    });
-  }
-
-  protected cancelEdit(): void {
-    this.editingExpenseId.set(null);
-  }
-
-  protected submitUpdate(expenseId: string): void {
-    if (this.editForm.invalid) {
-      this.editForm.markAllAsTouched();
-      return;
-    }
-
-    const raw = this.editForm.getRawValue();
-    const payload: UpdateFixedExpenseRequest = {
-      name: raw.name!.trim(),
-      amount: raw.amount!,
-      anchorDate: this.toApiDate(raw.anchorDate!),
-      recurrenceUnit: raw.recurrenceUnit!,
-      recurrenceInterval: raw.recurrenceInterval!,
-      skipUntilDate: raw.skipUntilDate ? this.toApiDate(raw.skipUntilDate) : null,
-      isActive: raw.isActive!,
-    };
-
+  private updateExpense(expenseId: string, payload: UpdateFixedExpenseRequest): void {
     this.updating.set(true);
 
     this.fixedExpenseApi
@@ -206,7 +140,6 @@ export class FixedExpenseListPageComponent {
             'Fixed expense updated',
             `${updatedExpense.name} was updated successfully.`,
           );
-          this.editingExpenseId.set(null);
         },
         error: (error: HttpErrorResponse) => {
           const fromService = this.fixedExpenseApi.errorMessage();
@@ -245,10 +178,6 @@ export class FixedExpenseListPageComponent {
           .subscribe({
             next: () => {
               this.expenses.update((current) => current.filter((item) => item.id !== expense.id));
-              if (this.editingExpenseId() === expense.id) {
-                this.editingExpenseId.set(null);
-              }
-
               this.toastMessage.success(
                 'Fixed expense removed',
                 `${expense.name} was removed from your list.`,
@@ -263,6 +192,16 @@ export class FixedExpenseListPageComponent {
             },
           });
       });
+  }
+
+  private openExpenseDialog(data: FixedExpenseDialogData) {
+    return this.dialog.open(FixedExpenseDialogComponent, {
+      autoFocus: false,
+      restoreFocus: true,
+      width: 'min(42rem, calc(100vw - 1rem))',
+      maxWidth: 'calc(100vw - 1rem)',
+      data,
+    });
   }
 
   private loadExpenses(): void {
@@ -330,17 +269,5 @@ export class FixedExpenseListPageComponent {
     }
 
     return 'Unable to remove this fixed expense right now.';
-  }
-
-  private toApiDate(value: Date): string {
-    const year = value.getFullYear();
-    const month = `${value.getMonth() + 1}`.padStart(2, '0');
-    const day = `${value.getDate()}`.padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  }
-
-  private fromApiDate(value: string): Date {
-    const [year, month, day] = value.split('-').map((part) => Number.parseInt(part, 10));
-    return new Date(year, month - 1, day);
   }
 }

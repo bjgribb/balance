@@ -1,8 +1,8 @@
-<h2 mat-dialog-title>Add Fixed Expense</h2>
+<h2 mat-dialog-title>{{ title }}</h2>
 
 <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
-  <mat-dialog-content class="add-fixed-expense-dialog__content">
-    <mat-form-field class="add-fixed-expense-dialog__field" appearance="outline">
+  <mat-dialog-content class="fixed-expense-dialog__content">
+    <mat-form-field class="fixed-expense-dialog__field" appearance="outline">
       <mat-label>Expense name</mat-label>
       <input matInput formControlName="name" maxlength="200" />
       @if (form.controls.name.touched && form.controls.name.hasError('required')) {
@@ -13,8 +13,8 @@
       }
     </mat-form-field>
 
-    <div class="add-fixed-expense-dialog__row">
-      <mat-form-field class="add-fixed-expense-dialog__field" appearance="outline">
+    <div class="fixed-expense-dialog__row">
+      <mat-form-field class="fixed-expense-dialog__field" appearance="outline">
         <mat-label>Amount</mat-label>
         <input
           matInput
@@ -33,7 +33,7 @@
         }
       </mat-form-field>
 
-      <mat-form-field class="add-fixed-expense-dialog__field" appearance="outline">
+      <mat-form-field class="fixed-expense-dialog__field" appearance="outline">
         <mat-label>Due date</mat-label>
         <input matInput [matDatepicker]="anchorDatePicker" formControlName="anchorDate" />
         <mat-datepicker-toggle matIconSuffix [for]="anchorDatePicker" />
@@ -44,8 +44,8 @@
       </mat-form-field>
     </div>
 
-    <div class="add-fixed-expense-dialog__row">
-      <mat-form-field class="add-fixed-expense-dialog__field" appearance="outline">
+    <div class="fixed-expense-dialog__row">
+      <mat-form-field class="fixed-expense-dialog__field" appearance="outline">
         <mat-label>Recurrence</mat-label>
         <mat-select formControlName="recurrenceUnit">
           @for (option of recurrenceOptions; track option.value) {
@@ -59,7 +59,7 @@
         }
       </mat-form-field>
 
-      <mat-form-field class="add-fixed-expense-dialog__field" appearance="outline">
+      <mat-form-field class="fixed-expense-dialog__field" appearance="outline">
         <mat-label>Frequency</mat-label>
         <input
           matInput
@@ -85,7 +85,7 @@
       </mat-form-field>
     </div>
 
-    <mat-form-field class="add-fixed-expense-dialog__field" appearance="outline">
+    <mat-form-field class="fixed-expense-dialog__field" appearance="outline">
       <mat-label>Skip until date (optional)</mat-label>
       <input matInput [matDatepicker]="skipUntilDatePicker" formControlName="skipUntilDate" />
       <mat-datepicker-toggle matIconSuffix [for]="skipUntilDatePicker" />
@@ -97,6 +97,6 @@
 
   <mat-dialog-actions align="end">
     <button mat-button type="button" mat-dialog-close>Cancel</button>
-    <button mat-flat-button type="submit" [disabled]="form.invalid">Add fixed expense</button>
+    <button mat-flat-button type="submit" [disabled]="form.invalid">{{ submitLabel }}</button>
   </mat-dialog-actions>
 </form>
